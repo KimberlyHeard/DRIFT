@@ -7,7 +7,7 @@ name = "drift-datasheet-verification"
 version = "0.0.1"
 description = "DRIFT planning scaffold; the application is awaiting Bob implementation"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["pydantic>=2.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
