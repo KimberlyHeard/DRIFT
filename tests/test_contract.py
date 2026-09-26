@@ -128,7 +128,7 @@ def test_T01_load_candidate_real_file_no_hash():
     c = load_candidate(CANDIDATE_PATH)
     assert c.device == "tmp117"
     assert c.profile_id == VALID_PROFILE_ID
-    assert c.status == "pending_human_review"
+    assert c.status == "reviewed"
 
 
 # ---------------------------------------------------------------------------
