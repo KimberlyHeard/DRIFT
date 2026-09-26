@@ -1,0 +1,125 @@
+{
+  "contract": {
+    "schema_version": "draft-0",
+    "device": "tmp117",
+    "profile_id": "tmp117-oneshot-noavg-0x48",
+    "status": "reviewed",
+    "approval": null,
+    "source": {
+      "id": "tmp117",
+      "document": "SNOSD82D",
+      "revision": "D",
+      "sha256": null
+    },
+    "facts": [
+      {
+        "id": "F01",
+        "claim": "ADD0 tied to ground selects seven-bit I2C address 0x48.",
+        "page": 21,
+        "pages": null,
+        "section": "Table 7-2"
+      },
+      {
+        "id": "F02",
+        "claim": "Register data is transferred most significant byte first.",
+        "page": 20,
+        "pages": null,
+        "section": "7.5.3.1"
+      },
+      {
+        "id": "F03",
+        "claim": "Temperature register 0x00, configuration 0x01, device ID 0x0F.",
+        "page": 25,
+        "pages": null,
+        "section": null
+      },
+      {
+        "id": "F04",
+        "claim": "Temperature is signed 16-bit two's-complement with 1/128 degree Celsius per LSB; reset temperature word is 0x8000.",
+        "page": 26,
+        "pages": null,
+        "section": "7.6.2"
+      },
+      {
+        "id": "F05",
+        "claim": "Factory-default configuration reset is 0x0220; Data_Ready bit 13, MOD bits 11:10, AVG bits 6:5. EEPROM-programmed configuration may change the power-up value.",
+        "page": 27,
+        "pages": null,
+        "section": null
+      },
+      {
+        "id": "F06",
+        "claim": "MOD 01 selects shutdown, MOD 11 selects one-shot, AVG 00 disables averaging.",
+        "page": 27,
+        "pages": null,
+        "section": null
+      },
+      {
+        "id": "F07",
+        "claim": "Conversion completion sets Data_Ready; reading configuration or temperature clears it.",
+        "page": 27,
+        "pages": null,
+        "section": null
+      },
+      {
+        "id": "F08",
+        "claim": "One-shot completes then returns to shutdown; CONV bits do not control one-shot conversion time.",
+        "page": null,
+        "pages": [
+          14,
+          15
+        ],
+        "section": "7.4.3"
+      },
+      {
+        "id": "F09",
+        "claim": "Single conversion timing is 13 ms minimum, 15.5 ms typical, 17.5 ms maximum.",
+        "page": 6,
+        "pages": null,
+        "section": null
+      },
+      {
+        "id": "F10",
+        "claim": "Device ID lower 12 bits are 0x117; upper 4 bits represent revision.",
+        "page": 32,
+        "pages": null,
+        "section": null
+      }
+    ],
+    "selected_profile": {
+      "address7": 72,
+      "mode": "one_shot",
+      "averaging": "none",
+      "initial_fixture_state": "shutdown_after_explicit_configuration"
+    },
+    "policies_not_vendor_facts": {
+      "timeout_us": 100000,
+      "poll_interval_us": 1000,
+      "virtual_conversion_us": 15500,
+      "clock": "deterministic_integer_microseconds",
+      "physical_hardware_validated": false
+    },
+    "derived_candidates": {
+      "shutdown_config_hex": "0600",
+      "start_config_hex": "0E00",
+      "completed_config_snapshot_hex": "2600",
+      "after_ready_consumed_hex": "0600",
+      "derivation": "From reset 0220, clear MOD mask 0C00 and AVG mask 0060; select shutdown 0400 or one-shot 0C00. Preserve CONV bits. Validate with the source before approval."
+    },
+    "model_limits": [
+      "Selected profile only",
+      "No electrical waveform or bus arbitration model",
+      "No accuracy/noise/thermal model",
+      "No EEPROM programming",
+      "No continuous mode or averaging support"
+    ],
+    "review_instructions": "Bob must validate/normalize this draft into its schema, preserve provenance, and stop for the human's explicit review. A source hash and canonical contract hash are required before approved generation."
+  },
+  "approval": {
+    "source_sha256": "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df",
+    "contract_sha256": "5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f",
+    "profile_id": "tmp117-oneshot-noavg-0x48",
+    "reviewer": "Kimberly Heard",
+    "approved_utc": "2026-09-26T17:52:57.082588+00:00"
+  }
+}

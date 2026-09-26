@@ -2,7 +2,7 @@
   "schema_version": "draft-0",
   "device": "tmp117",
   "profile_id": "tmp117-oneshot-noavg-0x48",
-  "status": "pending_human_review",
+  "status": "reviewed",
   "approval": null,
   "source": {"id": "tmp117", "document": "SNOSD82D", "revision": "D", "sha256": null},
   "facts": [
@@ -10,7 +10,7 @@
     {"id": "F02", "page": 20, "section": "7.5.3.1", "claim": "Register data is transferred most significant byte first."},
     {"id": "F03", "page": 25, "claim": "Temperature register 0x00, configuration 0x01, device ID 0x0F."},
     {"id": "F04", "page": 26, "section": "7.6.2", "claim": "Temperature is signed 16-bit two's-complement with 1/128 degree Celsius per LSB; reset temperature word is 0x8000."},
-    {"id": "F05", "page": 27, "claim": "Configuration reset is 0x0220; Data_Ready bit 13, MOD bits 11:10, AVG bits 6:5."},
+    {"id": "F05", "page": 27, "claim": "Factory-default configuration reset is 0x0220; Data_Ready bit 13, MOD bits 11:10, AVG bits 6:5. EEPROM-programmed configuration may change the power-up value."},
     {"id": "F06", "page": 27, "claim": "MOD 01 selects shutdown, MOD 11 selects one-shot, AVG 00 disables averaging."},
     {"id": "F07", "page": 27, "claim": "Conversion completion sets Data_Ready; reading configuration or temperature clears it."},
     {"id": "F08", "pages": [14, 15], "section": "7.4.3", "claim": "One-shot completes then returns to shutdown; CONV bits do not control one-shot conversion time."},
