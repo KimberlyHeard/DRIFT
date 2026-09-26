@@ -1,0 +1,17 @@
+{
+  "status": "candidate_pending_human_review",
+  "provenance": "Literal arithmetic examples prepared in ChatGPT, independently of any production driver or virtual model. Human source review is still required.",
+  "source_fact": "TI TMP117 SNOSD82D page 26: signed 16-bit two's-complement, 0.0078125 degrees Celsius per LSB",
+  "rule": "Never regenerate these expected values using production or model helpers.",
+  "vectors": [
+    {"id": "zero", "bytes_hex": "00 00", "signed_integer": 0, "expected_celsius": 0.0},
+    {"id": "room", "bytes_hex": "0C 80", "signed_integer": 3200, "expected_celsius": 25.0},
+    {"id": "negative_one", "bytes_hex": "FF 80", "signed_integer": -128, "expected_celsius": -1.0},
+    {"id": "negative_25", "bytes_hex": "F3 80", "signed_integer": -3200, "expected_celsius": -25.0},
+    {"id": "positive_lsb", "bytes_hex": "00 01", "signed_integer": 1, "expected_celsius": 0.0078125},
+    {"id": "negative_lsb", "bytes_hex": "FF FF", "signed_integer": -1, "expected_celsius": -0.0078125},
+    {"id": "low", "bytes_hex": "E4 80", "signed_integer": -7040, "expected_celsius": -55.0},
+    {"id": "high", "bytes_hex": "4B 00", "signed_integer": 19200, "expected_celsius": 150.0}
+  ],
+  "reset_word": {"bytes_hex": "80 00", "arithmetic_celsius": -256.0, "note": "Not a completed new measurement; test workflow readiness separately."}
+}

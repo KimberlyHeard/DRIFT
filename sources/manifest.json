@@ -1,0 +1,47 @@
+{
+  "status": "source_catalog_not_approval",
+  "sources": [
+    {
+      "id": "tmp117",
+      "vendor": "Texas Instruments",
+      "title": "TMP117 High-Accuracy, Low-Power, Digital Temperature Sensor",
+      "url": "https://www.ti.com/lit/ds/symlink/tmp117.pdf",
+      "observed_document": "SNOSD82D, revision D, September 2022",
+      "expected_pdf_pages": 50,
+      "current_local_sha256": null,
+      "prior_record": {
+        "date": "2026-09-20",
+        "sha256": "b33614678dd46e7997f813ccefb118796dcbcc97c9ba264806703ee453a3d555",
+        "note": "Historical planning record, not verification of your newly downloaded copy."
+      },
+      "use": "Review selected register, conversion and bus facts; publish source links and paraphrased facts.",
+      "kit_preparation_download": {
+        "sha256": "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df",
+        "recorded_at_utc": "2026-09-26T13:12:05.524755+00:00",
+        "bytes": 1718311,
+        "note": "Actual preparation-time vendor download; PDF excluded from ZIP. Hash your own copy and review before approving."
+      }
+    },
+    {
+      "id": "bme280",
+      "vendor": "Bosch Sensortec",
+      "title": "BME280 Combined humidity and pressure sensor",
+      "url": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
+      "observed_document": "Cover revision 1.24, February 2024, BST-BME280-DS001-24",
+      "expected_pdf_pages": 60,
+      "current_local_sha256": null,
+      "note": "Some inner footers have an earlier revision; inspect and hash the exact whole PDF.",
+      "use": "Extension: forced temperature-only profile, calibration and compensation.",
+      "kit_preparation_download": {
+        "sha256": "a2ccdb449fec94380742fe8eec851a11d9bd4142252d332b34682b4deecd7d89",
+        "recorded_at_utc": "2026-09-26T13:13:09.023097+00:00",
+        "bytes": 1663806,
+        "note": "Actual preparation-time vendor download; PDF excluded from ZIP. Hash your own copy and review before approving."
+      }
+    }
+  ],
+  "optional_reference": {
+    "url": "https://github.com/boschsensortec/BME280_SensorAPI",
+    "note": "Vendor implementation cross-check; preserve licensing if copying code."
+  }
+}
