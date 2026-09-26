@@ -1,57 +1,68 @@
 # DRIFT current status
 
-Updated: September 27, 2026, after Task 04 driver + scripted bus.
+Updated: September 26, 2026, after Task 05 virtual-device implementation and Kimberly's full-suite run.
 
 ## Locked scope
 
-- Primary device: real TI TMP117, one-shot, no averaging, selected seven-bit I²C address `0x48`, fixture initialized explicitly in shutdown.
+- Primary device: real TI TMP117, one-shot, no averaging, selected seven-bit I²C address `0x48`, with the fixture explicitly initialized in shutdown.
 - Second device: real Bosch BME280 temperature-only forced profile, after the TMP117 end-to-end loop works.
-- Bob IDE performs and documents the central implementation and the recorded defect repair. Expectations remain independent of production code.
+- Bob IDE performs and documents central implementation and the recorded defect repair. Expected values remain independent of production code.
 
-## Environment
+## Environment and budget
 
 - Python 3.12.10; pytest 9.1.1; Pydantic 2.13.5.
 - Git 2.46.0.windows.1; Node v24.19.0; npm 11.17.0.
 - Virtual environment: `.venv\Scripts\python.exe`; editable package installed.
-- Last reported Bob usage: 11.18 / 40 Bobcoins; next task cost cap: 3 Bobcoins. Recheck current usage in Bob IDE before starting.
+- Bob usage after Task 05: approximately 14.86 / 40 Bobcoins; approximately 25.14 remain. Task 05 cost 1.75. Recheck the account total in Bob IDE before relying on these figures.
+- Current per-task Bob cost limit: 3 Bobcoins.
 
 ## Implemented
 
-1. **Task 01 — interfaces.** `src/drift/interfaces.py` defines `RegisterBus` and `Clock` protocols, frozen result/trace dataclasses, typed errors, and seven-bit address validation. Bus, clock, driver, virtual device, scenario, runner, and reporting module stubs exist. `tests/test_interfaces.py` contains 31 checks.
-2. **Task 02 — source contract and gate.** `src/drift/contract.py` implements Pydantic candidate/approval models, canonical contract hashing, source-hash binding, profile/citation validation, and stale-approval rejection. `tests/test_contract.py` has 18 checks. `docs/TMP117_SOURCE_REVIEW.md` links F01–F10 to printed pages in TI SNOSD82D Rev. D and distinguishes source facts from derived values and DRIFT policies. `scripts/approve_contract.py` checks the PDF and requires Kimberly's name and explicit `YES`; `tests/test_approve_contract_script.py` has 12 checks, including default output naming. The Bob session that added the review page was called Task 03, but this work completes the source-approval phase of the ordered task cards.
-3. **Human source approval.** `contracts/tmp117.candidate.json` is marked `reviewed`; `contracts/tmp117.approved.json` was approved by Kimberly Heard at `2026-09-26T17:52:57Z`. Source PDF SHA-256: `637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df`. Canonical approved contract SHA-256: `5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f`. The vendor PDF stays in `local_sources/` outside Git.
-4. **Task 03 — decoder and isolated mutants.** `src/drift/decoders/tmp117.py` implements strict two-byte, signed, MSB-first `decode_temperature()` and revision-tolerant `decode_device_id()` checking part ID `0x117`. `tests/test_decoder_tmp117.py` has 29 checks using literal oracle values, length/identity cases, and detectable byte-swap and unsigned defects. `0x8000` is tested as arithmetic (`-256 °C`), not claimed to be a valid completed reading.
-5. **Task 04 — TMP117 driver and independent scripted bus.** `src/drift/bus.py` adds `ScriptedBus` (ordered transaction checker returning literal bytes, raises `ScriptedBusExhausted`/`ScriptedBusStepMismatch` on any deviation). `src/drift/clock.py` adds `StepClock` (deterministic integer-µs clock). `src/drift/drivers/tmp117.py` implements `TMP117Driver` with `identify()`, `configure()`, and `measure(timeout_us=100_000)`: reads device-ID reg 0x0F (validates part 0x117, any revision), writes shutdown config 0x0600 to reg 0x01, writes one-shot 0x0E00, polls reg 0x01 every 1000 µs for Data_Ready (bit 13), uses the ready observation from the configuration read without a second status read (F07), then reads temperature reg 0x00 and decodes. `tests/test_driver_tmp117.py` has 39 checks.
+1. **Task 01 — interfaces.** `src/drift/interfaces.py` defines `RegisterBus` and `Clock` protocols, frozen result/trace dataclasses, typed errors, and seven-bit address validation. `tests/test_interfaces.py` contains 31 checks.
 
-## Verified tests
+2. **Task 02 — source contract and approval gate.** `src/drift/contract.py` implements Pydantic candidate/approval models, canonical contract hashing, source-hash binding, citation/profile validation, and stale-approval rejection. `tests/test_contract.py` contains 18 checks. `docs/TMP117_SOURCE_REVIEW.md` links facts F01–F10 to printed pages of TI SNOSD82D Rev. D and separates vendor facts, derived values, and DRIFT policies. `scripts/approve_contract.py` requires source verification and Kimberly's explicit approval; its test file contains 12 checks. One Bob task in this phase was labeled Task 03 in the IDE, but it completed the ordered source-approval phase.
 
-| Run | Result |
+3. **Human source approval.** Kimberly approved `contracts/tmp117.approved.json` at `2026-09-26T17:52:57Z`. The candidate is marked `reviewed`. Source PDF SHA-256: `637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df`. Canonical approved contract SHA-256: `5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f`. The PDF remains outside Git in `local_sources/`.
+
+4. **Task 03 — decoder and isolated defects.** `src/drift/decoders/tmp117.py` decodes strict two-byte, signed, MSB-first temperatures and checks the device ID's lower 12 bits while accepting varying revision nibbles. `tests/test_decoder_tmp117.py` contains 29 checks using independent literal values, invalid lengths, identity cases, and byte-swap/unsigned defect examples. `0x8000` is arithmetic `-256 °C`, not a valid completed measurement.
+
+5. **Task 04 — driver and scripted transactions.** `src/drift/drivers/tmp117.py` implements identity, selected-profile configuration, and bounded one-shot measurement through bus and clock interfaces. `src/drift/bus.py` includes an ordered scripted bus; `src/drift/clock.py` includes a deterministic step clock. `tests/test_driver_tmp117.py` contains 39 checks, including polling, timeout, short read, varying revision, and consecutive measurements.
+
+6. **Task 05 — deterministic virtual device.** Bob added a TMP117 virtual model in `src/drift/devices/tmp117.py`, a virtual clock in `src/drift/clock.py`, and an addressed virtual-device bus in `src/drift/bus.py`. `tests/test_model_tmp117.py` adds 36 checks. The model was tested independently of the production driver. Kimberly reran the entire suite successfully. The actual example trace from Bob's task has not yet been independently inspected for the demo.
+
+## Verification
+
+| Check | Actual result |
 | --- | --- |
-| Task 01 interfaces | 31 passed in 0.11s |
-| Task 02 contract gate | 18 passed in 0.76s |
-| Task 02 approval CLI before final naming test | 11 passed in 0.37s; a twelfth CLI check was subsequently added and is included in the full suite |
-| Task 03 decoder targeted | 29 passed in 0.08s |
-| Task 04 driver + scripted bus targeted | 39 passed in 0.06s |
-| **Latest full suite: `.\.venv\Scripts\python.exe -m pytest -q`** | **129 passed in 0.45s**, exit 0, on Kimberly's Windows workspace |
+| Task 01 targeted | 31 passed |
+| Task 02 contract targeted | 18 passed |
+| Task 03 decoder targeted | 29 passed |
+| Task 04 driver targeted | 39 passed |
+| Full suite after Task 04 | 129 passed |
+| **Full suite after Task 05, run by Kimberly** | **165 passed in 0.42s; exit 0** |
 
-The first Task 03 full run had 89 passed / 1 failed because `tests/test_contract.py::test_T01_load_candidate_real_file_no_hash` still expected `pending_human_review` after the human-approved candidate had become `reviewed`. Kimberly updated that stale test assertion and reran the full suite: **90 passed**. This earlier failure is resolved; preserve both actual run results in the work log rather than presenting the first run as a pass.
+An earlier Task 03 run had 89 passed and one stale test asserting that the subsequently approved candidate was still pending. Kimberly corrected that assertion and reran the suite: 90 passed. That issue is resolved.
 
-Byte-swap arithmetic for `0C 80` must be reported accurately: swapped `0x800C` equals `-255.90625 °C`, not `-255.95 °C`. Literal temperature expectations must not be computed with production decoder helpers.
+For byte-swap demonstrations, swapped bytes `0C 80` become `0x800C`, or `-255.90625 °C`, not `-255.95 °C`.
 
 ## Not yet built or verified
 
-- TMP117 virtual device model (`src/drift/devices/tmp117.py`), VirtualClock (Task 05); baseline and four injected faults; runner/CLI and real reports.
-- Generated source/configuration artifacts; recorded Bob diagnosis and repair; public workbench and signed-out check; final presentation, demo, and submission.
-- BME280 reviewed contract, adapter, compensation/model/oracle, and independent integration checks.
-- Public GitHub push is not yet confirmed: HTTPS remote exists, but authentication previously failed. Save all relevant genuine Bob IDE task consumption-summary PNGs in `bob_sessions/` before submission.
+- **Task 06:** integrate the driver and virtual device; run positive and negative baselines, four injected faults, and a seeded byte-swap defect; produce real trace-backed reports and a CLI.
+- Deterministic generated driver/configuration artifacts from the approved profile.
+- Public judge workbench, deployment, and signed-out usability check.
+- Recorded Bob diagnosis and repair while independent expectations stay fixed.
+- BME280 source review, bounded adapter, independent expected values, and integration.
+- Presentation, real product demonstration video, and final submission.
+- Public GitHub push has not been confirmed. Relevant Bob IDE task consumption-summary PNGs must be placed in `bob_sessions/` before submission.
 
-## Next action — ordered Task 05
+## Next action
 
-Commit Task 04 driver/scripted-bus/tests. In a **new Bob IDE task**, implement the TMP117 virtual device model and addressed `VirtualDeviceBus` adapter (`src/drift/devices/tmp117.py`, `src/drift/bus.py`), with a `VirtualClock`. Test the model directly with literal transactions (before/at/after completion, two conversions, ready consumed by config read, trace events). No runner or CLI in Task 05.
+Commit Task 05's intended files and this status/work-log update. Begin Task 06 in a new Bob IDE task with the approved TMP117 profile. Verify a real driver-to-model baseline before expanding into fault reports.
 
 ## Handoff
 
-- Current baseline: approved real TMP117 contract; latest Windows full-suite result 129 passed in 0.45s.
-- Known current test failures: none in the latest full-suite run.
-- Next task: Task 05 virtual device model + VirtualClock + VirtualDeviceBus.
-- Manual checks: inspect `git status --short`, stage only intended files, save Bob session summaries, resolve GitHub push authentication before final submission.
+- Latest verified Windows full suite: `.\.venv\Scripts\python.exe -m pytest -q` → 165 passed in 0.42s.
+- Known current test failures: none in that run.
+- Model and driver have each been tested independently; their combined run is not yet verified.
+- Keep literal expected values independent of driver, model, and generator code.
+- Stage only intended files. Check the untracked screenshot before assigning it to a Bob task or committing it.

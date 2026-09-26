@@ -157,3 +157,66 @@ class ScriptedBus:
                     f"{s.operation} reg={s.register:#04x}" for s in remaining
                 )
             )
+
+
+# ---------------------------------------------------------------------------
+# VirtualDeviceBus — routes addressed bus calls to a virtual device model
+# ---------------------------------------------------------------------------
+
+class VirtualDeviceBus:
+    """
+    RegisterBus adapter that routes addressed register calls to a virtual
+    device model.
+
+    Only calls addressed to the registered device address are dispatched;
+    any other address raises AddressError.
+
+    The adapter itself does not accumulate a trace; trace events are recorded
+    by the underlying device model and accessible via ``device.trace``.
+
+    Parameters
+    ----------
+    device:
+        The virtual device model.  Must expose ``read_register(register)``
+        and ``write_register(register, payload)`` methods.
+    address_7bit:
+        The seven-bit I2C address that this device occupies on the bus.
+    """
+
+    def __init__(self, device, address_7bit: int = 0x48) -> None:
+        self._device = device
+        self._address = validate_7bit_address(address_7bit)
+
+    def read_register(self, address_7bit: int, register: int, length: int) -> bytes:
+        """
+        Route a register read to the device if the address matches.
+
+        Raises
+        ------
+        AddressError
+            If the address does not match the registered device address.
+        """
+        validate_7bit_address(address_7bit)
+        if address_7bit != self._address:
+            raise AddressError(
+                f"VirtualDeviceBus: no device at address {address_7bit:#04x}; "
+                f"registered address is {self._address:#04x}"
+            )
+        return self._device.read_register(register)
+
+    def write_register(self, address_7bit: int, register: int, payload: bytes) -> None:
+        """
+        Route a register write to the device if the address matches.
+
+        Raises
+        ------
+        AddressError
+            If the address does not match the registered device address.
+        """
+        validate_7bit_address(address_7bit)
+        if address_7bit != self._address:
+            raise AddressError(
+                f"VirtualDeviceBus: no device at address {address_7bit:#04x}; "
+                f"registered address is {self._address:#04x}"
+            )
+        self._device.write_register(register, payload)
