@@ -14,6 +14,10 @@ Usage
   python -m drift.cli verify --profile tmp117_one_shot_no_average \\
          --output artifacts/verification.json
 
+  python -m drift.cli generate \\
+         --contract contracts/tmp117.approved.json \\
+         --output generated/
+
 Both subcommands:
   - Reject unknown profiles, scenarios, and driver variants before execution.
   - Create the output directory if it does not exist.
@@ -33,6 +37,7 @@ import argparse
 import json
 import sys
 
+from drift.generator import generate_service
 from drift.reporting import (
     build_report,
     build_verification_summary,
@@ -127,6 +132,39 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: generate
+# ---------------------------------------------------------------------------
+
+def cmd_generate(args: argparse.Namespace) -> int:
+    """
+    Generate driver, device model, and manifest from an approved contract.
+
+    Returns an exit code: 0 = ok, 1 = argument/approval error, 2 = infrastructure error.
+    """
+    try:
+        result = generate_service(
+            contract_path=args.contract,
+            output_root=args.output,
+        )
+    except (ValueError, FileNotFoundError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:
+        print(f"INFRASTRUCTURE ERROR: {exc}", file=sys.stderr)
+        return 2
+
+    print(f"[GENERATE]  profile={result['profile_id']}")
+    print(f"  output_dir    : {result['output_dir']}")
+    print(f"  driver.py     : {result['driver_path']}")
+    print(f"  device_model.py: {result['model_path']}")
+    print(f"  manifest.json : {result['manifest_path']}")
+    print(f"  contract_sha256: {result['contract_sha256']}")
+    print(f"  driver_sha256  : {result['driver_sha256']}")
+    print(f"  model_sha256   : {result['model_sha256']}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Argument parser
 # ---------------------------------------------------------------------------
 
@@ -175,6 +213,22 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output JSON summary path (directory created if needed).",
     )
 
+    # --- generate ---
+    gen_p = sub.add_parser(
+        "generate",
+        help="Generate driver/model/manifest from an approved contract.",
+    )
+    gen_p.add_argument(
+        "--contract",
+        required=True,
+        help="Path to the approved contract JSON file.",
+    )
+    gen_p.add_argument(
+        "--output",
+        default="generated",
+        help="Root output directory (default: generated/).",
+    )
+
     return parser
 
 
@@ -190,6 +244,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_run(args)
     if args.command == "verify":
         return cmd_verify(args)
+    if args.command == "generate":
+        return cmd_generate(args)
 
     parser.print_help()
     return 1

@@ -1,0 +1,24 @@
+{
+  "schema": "drift-generation-manifest-1",
+  "profile_id": "tmp117-oneshot-noavg-0x48",
+  "generated_utc": "2026-09-26T22:38:52.762576+00:00",
+  "inputs": {
+    "contract_sha256": "5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f",
+    "template_sha256": "e0e39c5013847a8e4f47dccc6ec14a3416e7ef0818b8e344ba51faf12fb86190",
+    "generator_sha256": "e85d5bfe1c0d7dbaff8ecd5c66f0b5fbdbd988a2f534c8ddafe0550b8e2fa045"
+  },
+  "outputs": {
+    "driver_sha256": "02eca1cbdd96dd1d2b1cd1ed472c0ae15b035d5857c0debee1ac78bc79dc47b8",
+    "model_sha256": "6069f87e6f34688fa36226e650e9da9755c06570b424cbf0d44d10af5d5bd762"
+  },
+  "approved_by": "Kimberly Heard",
+  "approved_utc": "2026-09-26T17:52:57.082588+00:00",
+  "source_sha256": "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df",
+  "scope": [
+    "Selected profile only",
+    "No electrical waveform or bus arbitration model",
+    "No accuracy/noise/thermal model",
+    "No EEPROM programming",
+    "No continuous mode or averaging support"
+  ]
+}
