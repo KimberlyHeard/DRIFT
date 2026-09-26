@@ -219,14 +219,24 @@ class TestAfterCompletion:
         # Independent literal: 0x0600 — shutdown, Data_Ready cleared.
         assert cfg == b"\x06\x00"
 
-    def test_T15_second_temperature_read_returns_sentinel(self):
-        """A second temperature read after Data_Ready was consumed returns 0x8000."""
-        clock, device, bus = make_fresh()
+    def test_T15_second_temperature_read_returns_stored_sample(self):
+        """
+        A second temperature read after Data_Ready was consumed returns the
+        stored sample, not the sentinel.
+
+        F04: the temperature register stores the last completed conversion.
+        Reading it clears Data_Ready (F07) but does not erase the stored result.
+        The stored sample persists until the next conversion or reset_fixture().
+        Independent literal: default temperature_raw = 0x0C80 = 25.0 °C.
+        """
+        clock, device, bus = make_fresh(temperature_raw=0x0C80)
         bus.write_register(0x48, 0x01, b"\x0E\x00")
         clock.advance_us(16_000)
         bus.read_register(0x48, 0x00, 2)   # first read — consumes Data_Ready
         raw2 = bus.read_register(0x48, 0x00, 2)
-        assert raw2 == b"\x80\x00"
+        # Independent literal: stored sample 0x0C80 (25.0 °C); Data_Ready cleared
+        # but temperature register retains the last conversion result.
+        assert raw2 == b"\x0C\x80"
 
     def test_T16_after_completion_config_is_shutdown(self):
         """
@@ -262,28 +272,38 @@ class TestReadyConsumedByConfigRead:
 
     def test_T18_after_config_consumes_ready_temperature_gives_sample(self):
         """
-        After a config read consumes Data_Ready, reading temperature still
-        returns the stored sample (the read just returns raw; ready was cleared).
+        After a config read consumes Data_Ready, reading temperature returns
+        the latched conversion sample.
 
-        At completion, temperature_raw was latched.  The subsequent temperature
-        read (with Data_Ready already cleared) returns 0x8000 (no valid data),
-        not the sample, because the flag was consumed by the config read.
+        F04: the temperature register stores the last completed conversion.
+        F07: reading configuration clears Data_Ready but does NOT erase the
+        stored temperature result.  The temperature read that follows still
+        returns the latched sample (0x0C80).
+
+        Independent literal: temperature_raw = 0x0C80 = 25.0 °C.
         """
         clock, device, bus = make_fresh(temperature_raw=0x0C80)
         bus.write_register(0x48, 0x01, b"\x0E\x00")
         clock.advance_us(15_500)
         bus.read_register(0x48, 0x01, 2)   # config read consumes Data_Ready
         raw = bus.read_register(0x48, 0x00, 2)
-        # Data_Ready was consumed by config read; temperature returns sentinel.
-        assert raw == b"\x80\x00"
+        # Independent literal: latched sample 0x0C80 (25.0 °C).
+        # Data_Ready was cleared by the config read; temperature register is
+        # unaffected and returns the stored conversion result.
+        assert raw == b"\x0C\x80"
 
     def test_T19_driver_flow_config_read_consumes_ready_no_extra_read(self):
         """
         The driver pattern: write one-shot, poll config, observe ready, then
-        read temperature.  Config read returned 0x2600 (ready); next op is
-        temperature read.  No extra status read.
+        read temperature.  Config read returned 0x2600 (ready) and consumed
+        Data_Ready (F07); temperature read returns the latched sample.
 
-        This test follows the driver's exact sequence (F07).
+        F04: temperature register stores the last completed conversion.
+        F07: config read clears Data_Ready but does not erase the stored result.
+        This is the exact driver sequence — measure() polls config until
+        Data_Ready, then reads temperature register once.
+
+        Independent literal: temperature_raw = 0x0C80 = 25.0 °C.
         """
         clock, device, bus = make_fresh(temperature_raw=0x0C80)
         # Step 1: write one-shot.
@@ -296,10 +316,11 @@ class TestReadyConsumedByConfigRead:
         clock.advance_us(1_000)            # now at 16 000 µs
         cfg_ready = bus.read_register(0x48, 0x01, 2)
         assert cfg_ready == b"\x26\x00"    # ready snapshot (F07)
-        # Step 4: read temperature (Data_Ready was already consumed by step 3).
+        # Step 4: read temperature.  Data_Ready was consumed by the config read
+        # in step 3, but the temperature register retains the latched sample.
         raw_temp = bus.read_register(0x48, 0x00, 2)
-        # Config read consumed Data_Ready; temperature returns sentinel.
-        assert raw_temp == b"\x80\x00"
+        # Independent literal: stored sample 0x0C80 (25.0 °C).
+        assert raw_temp == b"\x0C\x80"
 
 
 # ---------------------------------------------------------------------------
@@ -545,7 +566,8 @@ class TestTraceStructure:
         # Event 2: config poll at/after deadline
         clock.advance_us(2_000)           # total 16 000 µs
         bus.read_register(0x48, 0x01, 2)  # returns ready snapshot, clears ready
-        # Event 3: temperature read (Data_Ready was consumed above, returns sentinel)
+        # Event 3: temperature read.  Data_Ready was consumed by the config
+        # read in event 2, but temperature register returns the latched sample.
         bus.read_register(0x48, 0x00, 2)
 
         trace = device.trace
@@ -557,4 +579,7 @@ class TestTraceStructure:
         assert trace[2].operation == "read"
         assert trace[2].received_bytes == b"\x26\x00"   # ready snapshot
         assert trace[3].operation == "read"
-        assert trace[3].received_bytes == b"\x80\x00"   # sentinel (ready consumed)
+        # Independent literal: stored sample 0x0C80 (25.0 °C).
+        # Data_Ready was consumed by the config read (event 2); temperature
+        # register is unaffected and returns the latched conversion result.
+        assert trace[3].received_bytes == b"\x0C\x80"

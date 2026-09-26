@@ -1,6 +1,6 @@
 # DRIFT current status
 
-Updated: September 26, 2026, after Task 05 virtual-device implementation and Kimberly's full-suite run.
+Updated: September 26, 2026, after the Task 06 integration checkpoint.
 
 ## Locked scope
 
@@ -13,14 +13,14 @@ Updated: September 26, 2026, after Task 05 virtual-device implementation and Kim
 - Python 3.12.10; pytest 9.1.1; Pydantic 2.13.5.
 - Git 2.46.0.windows.1; Node v24.19.0; npm 11.17.0.
 - Virtual environment: `.venv\Scripts\python.exe`; editable package installed.
-- Bob usage after Task 05: approximately 14.86 / 40 Bobcoins; approximately 25.14 remain. Task 05 cost 1.75. Recheck the account total in Bob IDE before relying on these figures.
+- Latest account usage reported by Kimberly: 16.54 / 40 Bobcoins; 23.46 remain. Use the account balance as authoritative because displayed task costs are rounded.
 - Current per-task Bob cost limit: 3 Bobcoins.
 
 ## Implemented
 
 1. **Task 01 — interfaces.** `src/drift/interfaces.py` defines `RegisterBus` and `Clock` protocols, frozen result/trace dataclasses, typed errors, and seven-bit address validation. `tests/test_interfaces.py` contains 31 checks.
 
-2. **Task 02 — source contract and approval gate.** `src/drift/contract.py` implements Pydantic candidate/approval models, canonical contract hashing, source-hash binding, citation/profile validation, and stale-approval rejection. `tests/test_contract.py` contains 18 checks. `docs/TMP117_SOURCE_REVIEW.md` links facts F01–F10 to printed pages of TI SNOSD82D Rev. D and separates vendor facts, derived values, and DRIFT policies. `scripts/approve_contract.py` requires source verification and Kimberly's explicit approval; its test file contains 12 checks. One Bob task in this phase was labeled Task 03 in the IDE, but it completed the ordered source-approval phase.
+2. **Task 02 — source contract and approval gate.** `src/drift/contract.py` implements Pydantic candidate/approval models, canonical contract hashing, source-hash binding, citation/profile validation, and stale-approval rejection. `tests/test_contract.py` contains 18 checks. `docs/TMP117_SOURCE_REVIEW.md` links F01–F10 to printed pages in TI SNOSD82D Rev. D and separates vendor facts, derived values, and DRIFT policies. `scripts/approve_contract.py` requires source verification and Kimberly's explicit approval; its test file contains 12 checks. One Bob session in this phase was labeled Task 03 in the IDE, but it completed the ordered source-approval phase.
 
 3. **Human source approval.** Kimberly approved `contracts/tmp117.approved.json` at `2026-09-26T17:52:57Z`. The candidate is marked `reviewed`. Source PDF SHA-256: `637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df`. Canonical approved contract SHA-256: `5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f`. The PDF remains outside Git in `local_sources/`.
 
@@ -28,18 +28,23 @@ Updated: September 26, 2026, after Task 05 virtual-device implementation and Kim
 
 5. **Task 04 — driver and scripted transactions.** `src/drift/drivers/tmp117.py` implements identity, selected-profile configuration, and bounded one-shot measurement through bus and clock interfaces. `src/drift/bus.py` includes an ordered scripted bus; `src/drift/clock.py` includes a deterministic step clock. `tests/test_driver_tmp117.py` contains 39 checks, including polling, timeout, short read, varying revision, and consecutive measurements.
 
-6. **Task 05 — deterministic virtual device.** Bob added a TMP117 virtual model in `src/drift/devices/tmp117.py`, a virtual clock in `src/drift/clock.py`, and an addressed virtual-device bus in `src/drift/bus.py`. `tests/test_model_tmp117.py` adds 36 checks. The model was tested independently of the production driver. Kimberly reran the entire suite successfully. The actual example trace from Bob's task has not yet been independently inspected for the demo.
+6. **Task 05 — deterministic virtual device.** `src/drift/devices/tmp117.py` implements the selected-profile virtual model. `src/drift/clock.py` provides a virtual clock, and `src/drift/bus.py` provides an addressed virtual-device bus. `tests/test_model_tmp117.py` contains 36 model checks. Trace events are frozen records exposed through tuple snapshots.
+
+7. **Task 06 integration checkpoint — real driver against virtual device.** Bob first reproduced a genuine integration failure: a configuration poll returned ready word `2600`, but the subsequent temperature read incorrectly returned reset word `8000`. Bob corrected the model so its temperature register stores the last completed conversion independently of the `Data_Ready` flag. Model tests T15, T18, T19, and T36 were corrected. `tests/test_integration_tmp117.py` adds two independent driver-to-model checks: `0C80` produces `25.0 °C`, and `FF80` produces `-1.0 °C`. In the corrected positive trace, the ready poll at 16,000 virtual µs returns `2600` and the temperature read returns `0C80`. The approved source contract and independent temperature expectations did not change.
 
 ## Verification
 
 | Check | Actual result |
 | --- | --- |
-| Task 01 targeted | 31 passed |
+| Task 01 interfaces targeted | 31 passed |
 | Task 02 contract targeted | 18 passed |
 | Task 03 decoder targeted | 29 passed |
 | Task 04 driver targeted | 39 passed |
 | Full suite after Task 04 | 129 passed |
-| **Full suite after Task 05, run by Kimberly** | **165 passed in 0.42s; exit 0** |
+| Full suite after Task 05 | 165 passed |
+| **Latest full suite, rerun by Kimberly** | **167 passed in 0.43s; exit 0** |
+
+Bob also recorded the integration failure before its fix: the ready poll returned `2600`, followed by incorrect temperature bytes `8000`. The corrected trace returns `0C80` for the 25 °C fixture. This is an integration correction, separate from the planned seeded byte-swap demonstration and recorded Bob repair.
 
 An earlier Task 03 run had 89 passed and one stale test asserting that the subsequently approved candidate was still pending. Kimberly corrected that assertion and reran the suite: 90 passed. That issue is resolved.
 
@@ -47,22 +52,23 @@ For byte-swap demonstrations, swapped bytes `0C 80` become `0x800C`, or `-255.90
 
 ## Not yet built or verified
 
-- **Task 06:** integrate the driver and virtual device; run positive and negative baselines, four injected faults, and a seeded byte-swap defect; produce real trace-backed reports and a CLI.
+- Remaining Task 06: baseline and four injected fault scenarios, a seeded byte-swap failing report, bounded runner/CLI, provenance-bearing JSON reports, and repeatability checks.
 - Deterministic generated driver/configuration artifacts from the approved profile.
 - Public judge workbench, deployment, and signed-out usability check.
-- Recorded Bob diagnosis and repair while independent expectations stay fixed.
+- Recorded Bob diagnosis and repair of the seeded defect while independent expectations stay fixed.
 - BME280 source review, bounded adapter, independent expected values, and integration.
 - Presentation, real product demonstration video, and final submission.
-- Public GitHub push has not been confirmed. Relevant Bob IDE task consumption-summary PNGs must be placed in `bob_sessions/` before submission.
+- Public GitHub push has not been confirmed. Relevant genuine Bob IDE task consumption-summary PNGs must be placed in `bob_sessions/` before submission.
 
 ## Next action
 
-Commit Task 05's intended files and this status/work-log update. Begin Task 06 in a new Bob IDE task with the approved TMP117 profile. Verify a real driver-to-model baseline before expanding into fault reports.
+Commit the Task 06 integration correction. In a new Bob IDE task, implement the remaining fault runner, reports, and CLI using the verified driver-to-model baseline. Inject short reads explicitly at a bus wrapper and trace the bytes actually delivered; the normal virtual device still returns two-byte registers.
 
 ## Handoff
 
-- Latest verified Windows full suite: `.\.venv\Scripts\python.exe -m pytest -q` → 165 passed in 0.42s.
+- Latest verified Windows full suite: `.\.venv\Scripts\python.exe -m pytest -q` → 167 passed in 0.43s.
 - Known current test failures: none in that run.
-- Model and driver have each been tested independently; their combined run is not yet verified.
+- Actual baseline integration works for positive and negative literal fixtures.
+- Four fault scenarios, report pipeline, and seeded failing report are not yet implemented.
 - Keep literal expected values independent of driver, model, and generator code.
-- Stage only intended files. Check the untracked screenshot before assigning it to a Bob task or committing it.
+- Stage only intended files; the root-level screenshot remains untracked until identified and moved into `bob_sessions/`.

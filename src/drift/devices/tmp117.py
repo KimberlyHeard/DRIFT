@@ -137,10 +137,17 @@ class TMP117VirtualDevice:
     the conversion completes: Data_Ready sets and the mode reverts to shutdown
     (F07/F08).
 
-    Reading the configuration register while Data_Ready is set returns the
-    ready snapshot (0x2600) and clears Data_Ready (F07).
-    Reading the temperature register returns the sampled raw word and clears
-    Data_Ready (F07).
+    The temperature register stores the last completed conversion result and
+    begins at the reset sentinel 0x8000 (F04).  Once a conversion completes,
+    the sample is latched in ``_stored_temperature`` and is returned on every
+    subsequent temperature read regardless of ``_data_ready``.  Reading the
+    configuration register clears Data_Ready (F07) but does NOT erase the
+    stored temperature result; the next temperature read still returns the
+    latched sample.
+
+    Reading the temperature register also clears Data_Ready (F07), but the
+    stored sample remains for subsequent reads until the next conversion
+    overwrites it.
 
     The virtual clock is external; this model queries it via ``clock.now_us()``.
     No real sleeps; time advances only when the caller advances the clock.
@@ -172,6 +179,9 @@ class TMP117VirtualDevice:
         self._config_word: int = _CONFIG_SHUTDOWN
         self._data_ready: bool = False
         self._conversion_deadline_us: int = 0
+        # Temperature register: reset sentinel 0x8000 (F04) until a conversion
+        # completes and latches the sample.  Cleared only by reset_fixture().
+        self._stored_temperature: int = 0x8000
 
         # Trace for the current scenario
         self._trace = _TraceAccumulator()
@@ -190,6 +200,7 @@ class TMP117VirtualDevice:
         self._config_word = _CONFIG_SHUTDOWN
         self._data_ready = False
         self._conversion_deadline_us = 0
+        self._stored_temperature = 0x8000  # reset sentinel (F04)
         self._trace = _TraceAccumulator()
 
     # ------------------------------------------------------------------
@@ -201,13 +212,18 @@ class TMP117VirtualDevice:
         Advance internal state based on current virtual time.
 
         If a conversion is in progress and the deadline has been reached,
-        transition to READY and set Data_Ready (F07/F08).
+        transition to READY: latch the temperature sample, set Data_Ready,
+        and revert MOD to shutdown (F07/F08).
         """
         if self._state is _State.CONVERTING:
             if self._clock.now_us() >= self._conversion_deadline_us:
                 self._state = _State.READY
                 self._data_ready = True
                 self._config_word = _CONFIG_READY
+                # Latch the conversion result.  The temperature register now
+                # holds this sample and will continue to return it until the
+                # next conversion or reset_fixture().
+                self._stored_temperature = self._temperature_raw
 
     def _current_config_snapshot(self) -> int:
         """Return current configuration word including Data_Ready bit."""
@@ -255,12 +271,12 @@ class TMP117VirtualDevice:
             return result
 
         if register == _REG_TEMPERATURE:
-            # Temperature read returns the sampled raw word.
-            # If Data_Ready is set, clear it (F07).
-            ready_now = self._data_ready
-            raw_word = self._temperature_raw if ready_now else 0x8000
-            result = raw_word.to_bytes(2, "big")
-            if ready_now:
+            # Temperature register always returns the stored conversion result.
+            # Before any conversion completes, _stored_temperature is the reset
+            # sentinel 0x8000 (F04).  After a conversion it is the latched sample.
+            # If Data_Ready is set, reading temperature clears it (F07).
+            result = self._stored_temperature.to_bytes(2, "big")
+            if self._data_ready:
                 self._data_ready = False
                 self._config_word = _CONFIG_AFTER_READY_READ
                 self._state = _State.SHUTDOWN
