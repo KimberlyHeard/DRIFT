@@ -38,10 +38,12 @@ from drift.interfaces import (
 from drift.runner import (
     REPORT_SCHEMA_VERSION,
     RunResult,
+    _APPROVED_CONTRACT,
     _CONTRACT_SHA256,
     _SOURCE_SHA256,
     _REVIEWER,
     _APPROVED_UTC,
+    _POLICY_TIMEOUT_US,
 )
 from drift.scenarios import CLI_PROFILE_ID, APPROVED_PROFILE_ID
 
@@ -142,7 +144,11 @@ def report_to_dict(report: RunReport, result: RunResult) -> dict[str, Any]:
         "approved_profile_id": APPROVED_PROFILE_ID,
         "reviewer": _REVIEWER,
         "approved_utc": _APPROVED_UTC,
-        "source_document": "TI SNOSD82D Rev. D",
+        "source_document": (
+            f"TI {_APPROVED_CONTRACT.contract.source.document} "
+            f"Rev. {_APPROVED_CONTRACT.contract.source.revision}"
+        ),
+        "policy_timeout_us": _POLICY_TIMEOUT_US,
     }
 
     assertions_list = [_assertion_to_dict(a) for a in report.assertions]
@@ -230,7 +236,11 @@ def build_verification_summary(
         "approved_profile_id": APPROVED_PROFILE_ID,
         "reviewer": _REVIEWER,
         "approved_utc": _APPROVED_UTC,
-        "source_document": "TI SNOSD82D Rev. D",
+        "source_document": (
+            f"TI {_APPROVED_CONTRACT.contract.source.document} "
+            f"Rev. {_APPROVED_CONTRACT.contract.source.revision}"
+        ),
+        "policy_timeout_us": _POLICY_TIMEOUT_US,
     }
 
     return {

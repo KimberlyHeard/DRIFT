@@ -3,6 +3,7 @@ DRIFT scenario runner for the TMP117 selected profile.
 
 Responsibilities
 ----------------
+- Load and validate the approved source contract before any bus operations.
 - Accept only reviewed named scenarios and driver variants.
 - Construct a fresh stack (clock + device + bus + driver) for every run.
 - Invoke identify(), configure(), and measure() in the correct order.
@@ -19,6 +20,8 @@ AGENTS.md boundaries observed here:
   - Fault injection is labeled "fault_injection" in reports; seeded driver
     defects are labeled "seeded_defect".
   - Trace/report inspection cannot read device registers or mutate device state.
+  - Provenance and runtime policy are derived from the validated approved
+    contract; they are not duplicated as module-level constants.
 
 Operation count and virtual-time budget (DRIFT policies):
   - Max operations per run: 200 (bounds the loop for mutant testing).
@@ -28,12 +31,14 @@ Operation count and virtual-time budget (DRIFT policies):
 from __future__ import annotations
 
 import dataclasses
+import pathlib
 import time
 import uuid
 from typing import Any, Optional
 
 from drift.bus import VirtualDeviceBus
 from drift.clock import VirtualClock
+from drift.contract import ApprovedContract, ApprovalMissingError, StaleApprovalError
 from drift.devices.tmp117 import TMP117VirtualDevice
 from drift.drivers.tmp117 import TMP117Driver
 from drift.drivers.tmp117_variants import ByteSwapDriver
@@ -60,17 +65,43 @@ from drift.scenarios import (
 # DRIFT policy limits — not vendor facts.
 _MAX_OPERATIONS: int = 200
 _MAX_VIRTUAL_US: int = 200_000
-# Short timeout used for never_ready scenario so the test completes quickly.
-_FAULT_TIMEOUT_US: int = 20_000
 
 # Schema version for this runner's output format.
 REPORT_SCHEMA_VERSION: str = "1.0"
 
-# Approved contract provenance (bound at approval time — STATUS.md).
-_CONTRACT_SHA256: str = "5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f"
-_SOURCE_SHA256: str = "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df"
-_REVIEWER: str = "Kimberly Heard"
-_APPROVED_UTC: str = "2026-09-26T17:52:57Z"
+# ---------------------------------------------------------------------------
+# Approved contract — loaded and validated once at import time.
+# Provenance and runtime policy are derived from this object; they are not
+# duplicated as module constants.  A missing or stale contract is a hard
+# error: no bus operations may proceed without a valid approved contract.
+# ---------------------------------------------------------------------------
+
+_CONTRACT_PATH: pathlib.Path = (
+    pathlib.Path(__file__).parent.parent.parent / "contracts" / "tmp117.approved.json"
+)
+
+
+def _load_approved_contract(path: pathlib.Path) -> ApprovedContract:
+    """
+    Load and integrity-verify the approved contract.
+
+    Raises ApprovalMissingError or StaleApprovalError if the contract file is
+    absent, lacks an approval block, or has been modified since approval.
+    The local vendor PDF is not required; only the recorded source_sha256 in
+    the approval block is verified against itself (the PDF is kept outside Git).
+    """
+    return ApprovedContract.from_file(path)
+
+
+_APPROVED_CONTRACT: ApprovedContract = _load_approved_contract(_CONTRACT_PATH)
+
+# Convenience accessors derived from the validated contract — single source of
+# truth for provenance and runtime policy throughout runner and reporting.
+_CONTRACT_SHA256: str = _APPROVED_CONTRACT.approval.contract_sha256
+_SOURCE_SHA256: str = _APPROVED_CONTRACT.approval.source_sha256
+_REVIEWER: str = _APPROVED_CONTRACT.approval.reviewer
+_APPROVED_UTC: str = _APPROVED_CONTRACT.approval.approved_utc
+_POLICY_TIMEOUT_US: int = _APPROVED_CONTRACT.contract.policies_not_vendor_facts.timeout_us
 
 
 @dataclasses.dataclass
@@ -271,12 +302,10 @@ def execute_scenario(
     execution_status = "completed"
     device_outcome = "measurement"
 
-    # Determine timeout: use short timeout for never_ready to avoid slow tests.
-    measure_timeout = (
-        _FAULT_TIMEOUT_US
-        if scenario_id == "fault_never_ready"
-        else 100_000
-    )
+    # Timeout comes from the approved contract policy (timeout_us = 100 000 µs).
+    # Every scenario uses the same approved policy; there is no scenario-specific
+    # override.  The never_ready scenario exercises this full policy timeout.
+    measure_timeout = _POLICY_TIMEOUT_US
 
     try:
         driver.identify()

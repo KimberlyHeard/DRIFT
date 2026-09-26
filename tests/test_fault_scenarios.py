@@ -491,3 +491,148 @@ class TestTraceContent:
         assert "short_read_injected" in outcomes, (
             f"Expected 'short_read_injected'; got {outcomes}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Approval boundary tests — missing/stale contract, applied policy timeout
+# ---------------------------------------------------------------------------
+
+class TestApprovalBoundary:
+    """
+    Tests for the contract approval gate enforced by the runner.
+
+    FA01  _load_approved_contract raises ApprovalMissingError for a contract
+          file that has no approval block.
+    FA02  _load_approved_contract raises StaleApprovalError for a contract
+          file whose content has been modified after approval.
+    FA03  execute_scenario fault_never_ready uses the approved policy timeout
+          (100 000 µs); the virtual clock advances to at least 100 000 µs
+          before ConversionTimeout is raised.
+    FA04  report_to_dict provenance block carries policy_timeout_us == 100000.
+    """
+
+    def test_FA01_missing_approval_rejected(self, tmp_path):
+        """
+        A contract file with approval: null must raise ApprovalMissingError.
+        No bus operations may proceed without a valid approval block.
+        """
+        import json
+        from drift.contract import ApprovalMissingError
+        from drift.runner import _load_approved_contract
+
+        no_approval = {
+            "contract": {
+                "schema_version": "draft-0",
+                "device": "tmp117",
+                "profile_id": "tmp117-oneshot-noavg-0x48",
+                "status": "reviewed",
+                "approval": None,
+                "source": {
+                    "id": "tmp117",
+                    "document": "SNOSD82D",
+                    "revision": "D",
+                    "sha256": None,
+                },
+                "facts": [
+                    {
+                        "id": "F01",
+                        "claim": "ADD0 tied to ground selects 0x48.",
+                        "page": 21,
+                        "pages": None,
+                        "section": "Table 7-2",
+                    }
+                ],
+                "selected_profile": {
+                    "address7": 72,
+                    "mode": "one_shot",
+                    "averaging": "none",
+                    "initial_fixture_state": "shutdown_after_explicit_configuration",
+                },
+                "policies_not_vendor_facts": {
+                    "timeout_us": 100000,
+                    "poll_interval_us": 1000,
+                    "virtual_conversion_us": 15500,
+                    "clock": "deterministic_integer_microseconds",
+                    "physical_hardware_validated": False,
+                },
+                "derived_candidates": {
+                    "shutdown_config_hex": "0600",
+                    "start_config_hex": "0E00",
+                    "completed_config_snapshot_hex": "2600",
+                    "after_ready_consumed_hex": "0600",
+                    "derivation": "test",
+                },
+                "model_limits": ["Selected profile only"],
+                "review_instructions": "test",
+            },
+            "approval": None,
+        }
+        p = tmp_path / "no_approval.json"
+        p.write_text(json.dumps(no_approval), encoding="utf-8")
+
+        with pytest.raises(ApprovalMissingError):
+            _load_approved_contract(p)
+
+    def test_FA02_stale_approval_rejected(self, tmp_path):
+        """
+        A contract file whose content has been modified after approval must
+        raise StaleApprovalError.  The source PDF does not need to be present.
+        """
+        import json
+        import pathlib
+        from drift.contract import StaleApprovalError
+        from drift.runner import _load_approved_contract
+
+        # Load the real approved contract to get a valid structure, then
+        # tamper with the contract content so the hash no longer matches.
+        real_path = (
+            pathlib.Path(__file__).parent.parent
+            / "contracts"
+            / "tmp117.approved.json"
+        )
+        raw = json.loads(real_path.read_text(encoding="utf-8"))
+        # Tamper: change a fact claim without re-approving.
+        raw["contract"]["facts"][0]["claim"] = "TAMPERED claim — hash must fail."
+        stale_path = tmp_path / "stale.json"
+        stale_path.write_text(json.dumps(raw), encoding="utf-8")
+
+        with pytest.raises(StaleApprovalError):
+            _load_approved_contract(stale_path)
+
+    def test_FA03_never_ready_uses_policy_timeout(self):
+        """
+        execute_scenario fault_never_ready must use the approved 100 000 µs
+        policy timeout.  The virtual clock must advance to at least 100 000 µs
+        before ConversionTimeout is raised.
+
+        Independent check: the policy value comes from the approved contract
+        (policies_not_vendor_facts.timeout_us = 100 000).
+        """
+        result = execute_scenario("fault_never_ready", "baseline")
+        assert result.execution_status == "completed"
+        assert isinstance(result.raised_exception, ConversionTimeout), (
+            f"Expected ConversionTimeout; got {type(result.raised_exception).__name__}"
+        )
+        # Virtual clock must have advanced to at least the policy timeout.
+        assert result.virtual_end_us >= 100_000, (
+            f"Expected virtual_end_us >= 100 000 µs (approved policy); "
+            f"got {result.virtual_end_us} µs"
+        )
+
+    def test_FA04_provenance_carries_policy_timeout(self):
+        """
+        report_to_dict provenance block must carry policy_timeout_us == 100000
+        derived from the approved contract.
+        """
+        from drift.reporting import build_report, report_to_dict
+
+        result = execute_scenario("baseline_25c", "baseline")
+        report = build_report(result)
+        d = report_to_dict(report, result)
+        assert "policy_timeout_us" in d["provenance"], (
+            "provenance block is missing policy_timeout_us"
+        )
+        assert d["provenance"]["policy_timeout_us"] == 100_000, (
+            f"Expected policy_timeout_us=100000; "
+            f"got {d['provenance']['policy_timeout_us']}"
+        )

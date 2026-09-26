@@ -1,6 +1,6 @@
 # DRIFT current status
 
-Updated: September 26, 2026, after the Task 06 integration checkpoint.
+Updated: September 26, 2026, after the Task 06 approval/policy boundary.
 
 ## Locked scope
 
@@ -42,9 +42,12 @@ Updated: September 26, 2026, after the Task 06 integration checkpoint.
 | Task 04 driver targeted | 39 passed |
 | Full suite after Task 04 | 129 passed |
 | Full suite after Task 05 | 165 passed |
-| **Latest full suite, rerun by Kimberly** | **167 passed in 0.43s; exit 0** |
+| Task 06 fault scenarios targeted | 32 passed |
+| **Latest full suite after Task 06 approval/policy boundary** | **199 passed in 0.43s; exit 0** |
 
 Bob also recorded the integration failure before its fix: the ready poll returned `2600`, followed by incorrect temperature bytes `8000`. The corrected trace returns `0C80` for the 25 °C fixture. This is an integration correction, separate from the planned seeded byte-swap demonstration and recorded Bob repair.
+
+Task 06 approval/policy boundary: `src/drift/runner.py` now loads and integrity-verifies `contracts/tmp117.approved.json` once at import time via `ApprovedContract.from_file()`; a missing or stale approval is a hard error before any bus operations. Runtime policy (`timeout_us = 100 000 µs`) and provenance (contract hash, source hash, reviewer, approval UTC) are derived from the validated contract rather than duplicated as module constants. The `fault_never_ready` scenario-specific 20 000 µs timeout override is removed; it uses the approved 100 000 µs policy. `reporting.py` derives the provenance block and source document string from the same loaded contract; reports now carry `policy_timeout_us`. Four new tests (FA01–FA04) verify missing approval, stale approval, applied timeout, and provenance in reports.
 
 An earlier Task 03 run had 89 passed and one stale test asserting that the subsequently approved candidate was still pending. Kimberly corrected that assertion and reran the suite: 90 passed. That issue is resolved.
 
@@ -52,7 +55,7 @@ For byte-swap demonstrations, swapped bytes `0C 80` become `0x800C`, or `-255.90
 
 ## Not yet built or verified
 
-- Remaining Task 06: baseline and four injected fault scenarios, a seeded byte-swap failing report, bounded runner/CLI, provenance-bearing JSON reports, and repeatability checks.
+- Remaining Task 06: bounded runner/CLI, provenance-bearing JSON reports to disk, and repeatability checks; the baseline and four fault scenarios with the byte-swap failing report are implemented and verified.
 - Deterministic generated driver/configuration artifacts from the approved profile.
 - Public judge workbench, deployment, and signed-out usability check.
 - Recorded Bob diagnosis and repair of the seeded defect while independent expectations stay fixed.
@@ -66,7 +69,7 @@ Commit the Task 06 integration correction. In a new Bob IDE task, implement the 
 
 ## Handoff
 
-- Latest verified Windows full suite: `.\.venv\Scripts\python.exe -m pytest -q` → 167 passed in 0.43s.
+- Latest verified Windows full suite: `.\.venv\Scripts\python.exe -m pytest -q` → 199 passed in 0.43s.
 - Known current test failures: none in that run.
 - Actual baseline integration works for positive and negative literal fixtures.
 - Four fault scenarios, report pipeline, and seeded failing report are not yet implemented.
