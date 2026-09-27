@@ -1,0 +1,20 @@
+--- a/src/drift/drivers/tmp117_repair_candidate.py
++++ b/src/drift/drivers/tmp117_repair_candidate.py
+@@ -109,13 +109,11 @@
+         if len(temp_raw) != _REGISTER_WIDTH:
+             raise ProtocolReadError(
+                 f"RepairCandidateDriver: temperature register returned {len(temp_raw)} byte(s); expected 2"
+             )
+ 
+-        # SEEDED DEFECT: reversed byte order — to be patched.
+-        # Correct (F02, SNOSD82D p20 §7.5.3.1): temp_raw[0]=MSB, temp_raw[1]=LSB.
+-        # Defective: temp_raw[1] treated as MSB, temp_raw[0] as LSB.
+-        defective_raw = bytes([temp_raw[1], temp_raw[0]])
+-        celsius = decode_temperature(defective_raw)
++        # PATCH (F02, SNOSD82D p20 §7.5.3.1): register bytes are MSB first.
++        # temp_raw[0] is the high byte, temp_raw[1] is the low byte — no swap.
++        celsius = decode_temperature(temp_raw)
+ 
+         return Measurement(
+             raw_bytes=temp_raw,
+             celsius=celsius,
