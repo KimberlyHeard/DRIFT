@@ -1,0 +1,381 @@
+{
+  "schema_version": "1.0",
+  "run_id": "74d4fc7b-c6d6-4ea1-a6ea-f49f8ec5649c",
+  "scenario_id": "baseline_25c",
+  "profile_id": "tmp117_one_shot_no_average",
+  "driver_variant": "baseline",
+  "execution_status": "completed",
+  "device_outcome": "measurement",
+  "verification_status": "pass",
+  "expected_behavior_observed": true,
+  "assertions": [
+    {
+      "assertion_id": "celsius",
+      "expected": 25.0,
+      "actual": 25.0,
+      "passed": true,
+      "fact_ids": [
+        "F04"
+      ],
+      "trace_indices": [
+        19
+      ]
+    },
+    {
+      "assertion_id": "raw_bytes",
+      "expected": "0c80",
+      "actual": "0c80",
+      "passed": true,
+      "fact_ids": [
+        "F02",
+        "F04"
+      ],
+      "trace_indices": [
+        19
+      ]
+    },
+    {
+      "assertion_id": "virtual_time_us",
+      "expected": 16000,
+      "actual": 16000,
+      "passed": true,
+      "fact_ids": [
+        "F09"
+      ],
+      "trace_indices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "sequence": 0,
+      "virtual_time_us": 0,
+      "address_7bit": "0x48",
+      "register": "0x0F",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0117",
+      "outcome": "ok",
+      "fact_ids": [
+        "F03",
+        "F10"
+      ]
+    },
+    {
+      "sequence": 1,
+      "virtual_time_us": 0,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "write",
+      "sent_bytes": "0600",
+      "received_bytes": "",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06"
+      ]
+    },
+    {
+      "sequence": 2,
+      "virtual_time_us": 0,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "write",
+      "sent_bytes": "0e00",
+      "received_bytes": "",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F08",
+        "F09"
+      ]
+    },
+    {
+      "sequence": 3,
+      "virtual_time_us": 1000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 4,
+      "virtual_time_us": 2000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 5,
+      "virtual_time_us": 3000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 6,
+      "virtual_time_us": 4000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 7,
+      "virtual_time_us": 5000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 8,
+      "virtual_time_us": 6000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 9,
+      "virtual_time_us": 7000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 10,
+      "virtual_time_us": 8000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 11,
+      "virtual_time_us": 9000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 12,
+      "virtual_time_us": 10000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 13,
+      "virtual_time_us": 11000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 14,
+      "virtual_time_us": 12000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 15,
+      "virtual_time_us": 13000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 16,
+      "virtual_time_us": 14000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 17,
+      "virtual_time_us": 15000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0e00",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 18,
+      "virtual_time_us": 16000,
+      "address_7bit": "0x48",
+      "register": "0x01",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "2600",
+      "outcome": "ok",
+      "fact_ids": [
+        "F05",
+        "F06",
+        "F07"
+      ]
+    },
+    {
+      "sequence": 19,
+      "virtual_time_us": 16000,
+      "address_7bit": "0x48",
+      "register": "0x00",
+      "operation": "read",
+      "sent_bytes": "",
+      "received_bytes": "0c80",
+      "outcome": "ok",
+      "fact_ids": [
+        "F03",
+        "F04",
+        "F07"
+      ]
+    }
+  ],
+  "provenance": {
+    "contract_sha256": "5f15b14e522a0ad886f07dda88a32ae3771951141bbeb4f139c6395e1cf0423f",
+    "source_sha256": "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df",
+    "approved_profile_id": "tmp117-oneshot-noavg-0x48",
+    "reviewer": "Kimberly Heard",
+    "approved_utc": "2026-09-26T17:52:57Z",
+    "source_document": "TI SNOSD82D Rev. D"
+  },
+  "run_metadata": {
+    "wall_time_s": 0.0,
+    "virtual_end_us": 16000
+  },
+  "limitations": "Selected profile only (one-shot, AVG=00, 0x48). No electrical, timing accuracy, or physical validation. Virtual clock; no real sleeps."
+}

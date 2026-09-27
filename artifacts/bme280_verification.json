@@ -18,7 +18,7 @@
   "runs": [
     {
       "schema_version": "1.0",
-      "run_id": "c6779b8e-39bd-480d-96fc-661bb6c1cdfa",
+      "run_id": "b37b54bd-fe20-4fec-8fba-c5bcf11e4d75",
       "scenario_id": "bme280_25c",
       "profile_id": "bme280_forced_temp",
       "driver_variant": "baseline",
@@ -195,7 +195,7 @@
     },
     {
       "schema_version": "1.0",
-      "run_id": "f2a72935-1cfb-4ddd-abf2-a00a5947e890",
+      "run_id": "35a533ea-8d34-4a20-8713-38c0b667d1fa",
       "scenario_id": "bme280_neg8c",
       "profile_id": "bme280_forced_temp",
       "driver_variant": "baseline",
@@ -372,7 +372,7 @@
     },
     {
       "schema_version": "1.0",
-      "run_id": "326cc5b7-2a2b-4117-9120-5b04608a8036",
+      "run_id": "e0368342-64a5-40e2-b938-80774bc27c8c",
       "scenario_id": "bme280_short_temp",
       "profile_id": "bme280_forced_temp",
       "driver_variant": "baseline",
@@ -392,7 +392,98 @@
           "trace_indices": []
         }
       ],
-      "trace": [],
+      "trace": [
+        {
+          "sequence": 0,
+          "virtual_time_us": 0,
+          "address_7bit": "0x76",
+          "register": "0xD0",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "60",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 1,
+          "virtual_time_us": 0,
+          "address_7bit": "0x76",
+          "register": "0x88",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "706b436718fc",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 2,
+          "virtual_time_us": 0,
+          "address_7bit": "0x76",
+          "register": "0xF4",
+          "operation": "write",
+          "sent_bytes": "21",
+          "received_bytes": "",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 3,
+          "virtual_time_us": 1000,
+          "address_7bit": "0x76",
+          "register": "0xF3",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "08",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 4,
+          "virtual_time_us": 2000,
+          "address_7bit": "0x76",
+          "register": "0xF3",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "08",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 5,
+          "virtual_time_us": 3000,
+          "address_7bit": "0x76",
+          "register": "0xF3",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "08",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 6,
+          "virtual_time_us": 4000,
+          "address_7bit": "0x76",
+          "register": "0xF3",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "00",
+          "outcome": "ok",
+          "fact_ids": []
+        },
+        {
+          "sequence": 7,
+          "virtual_time_us": 4000,
+          "address_7bit": "0x76",
+          "register": "0xFA",
+          "operation": "read",
+          "sent_bytes": "",
+          "received_bytes": "7eed",
+          "outcome": "fault_short_read",
+          "fact_ids": [
+            "F04"
+          ]
+        }
+      ],
       "provenance": {
         "contract_sha256": "5b1ef2802b99e0e708dafae30de96f0bdacc5a349c0e9e6504d65a5f7f3bfa13",
         "source_sha256": "a2ccdb449fec94380742fe8eec851a11d9bd4142252d332b34682b4deecd7d89",

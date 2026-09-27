@@ -1,0 +1,26 @@
+{
+  "schema": "drift-generation-manifest-1",
+  "profile_id": "bme280-forced-temp-0x76",
+  "generated_utc": "2026-09-27T10:41:21.206953+00:00",
+  "inputs": {
+    "contract_sha256": "5b1ef2802b99e0e708dafae30de96f0bdacc5a349c0e9e6504d65a5f7f3bfa13",
+    "template_sha256": "73e0cd89d49438a8ea5a854828a065c201a21d95b5ae6fb3b722def6b45cd3d9",
+    "generator_sha256": "e167b5a50f14125561520d6bf2321f17652d7c27adbf7e7c041db8cdbea67253"
+  },
+  "outputs": {
+    "driver_sha256": "947ad22084f34197017e10b77021c9e57afe2587d0778b2857b133d9462aeaae",
+    "model_sha256": "7d40f9f8f81e52947b3c48c341e4803b4ce6b045e597a4b2bb05b992df0a33a3"
+  },
+  "approved_by": "Kimberly Heard",
+  "approved_utc": "2026-09-27T10:03:17.346138+00:00",
+  "source_sha256": "a2ccdb449fec94380742fe8eec851a11d9bd4142252d332b34682b4deecd7d89",
+  "scope": [
+    "Temperature-only forced mode profile; pressure and humidity outputs not implemented",
+    "No IIR filter (filter off)",
+    "No SPI interface support in this profile",
+    "No continuous / normal mode",
+    "No electrical waveform or bus arbitration model",
+    "No accuracy or thermal model",
+    "No EEPROM programming"
+  ]
+}

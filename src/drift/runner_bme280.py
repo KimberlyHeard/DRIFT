@@ -107,6 +107,47 @@ class BME280RunResult:
     expected_behavior_observed: bool
 
 
+class _TracedShortTempBus(ScriptedBus):
+    """Scripted fault bus whose trace records the bytes delivered to the driver."""
+
+    def __init__(self, steps, clock: VirtualClock) -> None:
+        super().__init__(steps)
+        self._clock = clock
+        self._events: list[TraceEvent] = []
+
+    def _record(self, address: int, register: int, operation: str,
+                sent: bytes, received: bytes, outcome: str) -> None:
+        self._events.append(TraceEvent(
+            sequence=len(self._events), virtual_time_us=self._clock.now_us(),
+            address_7bit=address, register=register, operation=operation,
+            sent_bytes=sent, received_bytes=received, outcome=outcome,
+            fact_ids=("F04",) if register == 0xFA else (),
+        ))
+
+    def read_register(self, address_7bit: int, register: int, length: int) -> bytes:
+        if register == 0xFA and length == 3:
+            # Explicit fault: return two actual bytes to the driver. The driver
+            # then raises ProtocolReadError on its three-byte length check.
+            step = self._next_step("read", address_7bit, register)
+            response = step.payload
+            if len(response) != 2:
+                raise AssertionError("short-read fixture must deliver two bytes")
+            self._record(address_7bit, register, "read", b"", response,
+                         "fault_short_read")
+            return response
+        response = super().read_register(address_7bit, register, length)
+        self._record(address_7bit, register, "read", b"", response, "ok")
+        return response
+
+    def write_register(self, address_7bit: int, register: int, payload: bytes) -> None:
+        super().write_register(address_7bit, register, payload)
+        self._record(address_7bit, register, "write", payload, b"", "ok")
+
+    @property
+    def trace(self) -> tuple[TraceEvent, ...]:
+        return tuple(self._events)
+
+
 def _build_short_temp_bus(
     calib: bytes,
     conversion_us: int,
@@ -135,7 +176,7 @@ def _build_short_temp_bus(
         ScriptedBus.step_read(_BME280_ADDR, 0xFA, _SHORT_TEMP_RESPONSE),  # short!
     ]
     clock = VirtualClock(0)
-    return ScriptedBus(steps), clock
+    return _TracedShortTempBus(steps, clock), clock
 
 
 def _evaluate_bme280_assertions(
@@ -332,10 +373,7 @@ def execute_bme280_scenario(
     if device_ref is not None:
         device_trace: tuple[TraceEvent, ...] = device_ref.trace
     else:
-        # Scripted bus — we don't have a device trace; build a minimal trace
-        # from the ScriptedBus step index if desired. For fault scenarios,
-        # trace is empty since ScriptedBus doesn't accumulate events.
-        device_trace = ()
+        device_trace = bus.trace
 
     # ------------------------------------------------------------------
     # Evaluate assertions.

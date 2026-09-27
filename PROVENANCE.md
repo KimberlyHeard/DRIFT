@@ -1,10 +1,10 @@
-# Provenance and attribution
+# DRIFT provenance and attribution
 
-- September 20, 2026: DRIFT's original written project planning was prepared before the event.
-- September 25: the plan was corrected to restore real TI TMP117 scope and the DRIFT name after an erroneous fictional-device draft. This kit contains no fictional datasheet.
-- September 26: ChatGPT prepared this consolidated playbook, prompts, candidate fact structure, fixed arithmetic fixtures, setup utilities and educational decoder example during the event.
-- Main application implementation: pending Bob IDE tasks. Do not attribute these kit files to Bob until Bob actually reviews/modifies them, and record that distinction.
-- Human datasheet approval: pending. No review signature or approval is supplied by this kit.
-- Test results: the educational script can check its fixed examples; this is not an executed DRIFT application suite.
+- September 20, 2026: Kimberly Heard prepared the initial project concept and planning direction before the event.
+- September 26: ChatGPT prepared the launch kit, bounded Bob task cards, initial candidate TMP117 facts, educational arithmetic example and environment/source utilities. Those pieces are not attributed to Bob.
+- September 26–27: IBM Bob IDE implemented the principal application: source contract gate, TMP117 decoder/driver/model, scenarios and reports, deterministic generator, seeded defect repair candidate, and BME280 contract support, driver, virtual device, runner, and two-profile generation. Bob tasks, actual code changes and test evidence are retained. Several Bob tasks reached per-task cost caps; files were verified and completed in later bounded steps.
+- Kimberly Heard reviewed and signed the exact TMP117 and BME280 contract snapshots. The contracts record her reviewer identity, approval time, source PDF SHA-256 and canonical content hash. The BME280 approval is for Bosch BST-BME280-DS001-24 Rev. 1.24; TMP117 for TI SNOSD82D Rev. D. Vendor PDFs stay local, outside the repository.
+- ChatGPT/Codex helped review claims, check independent arithmetic, guide focused corrections, and prepare judge-facing documentation and website material. In particular, the BME280 generated-driver verification tests and a short-read report trace correction were added after Bob reached its cost cap. They are not Bob-authored work.
+- This is a bounded software demonstration. No hardware-level validation, general PDF ingestion or universal driver generation is claimed. Generated artifacts use audited device-specific templates alongside the approved contract; the approval is a human decision.
 
-Add actual dates, tools, contributors, reused code/dependency licenses and source revisions as work proceeds. Whole vendor PDFs remain local and are not included in this kit. Source links and original paraphrased fact descriptions are provided for review.
+The measured test totals and replay counts belong to specific checked snapshots. Run `python -m pytest -q`, the verification commands in README and the replay script again after final changes before presenting final numbers. Genuine Bob task screenshots belong in `bob_sessions/` and the actual before/after repair reports in `artifacts/`.
