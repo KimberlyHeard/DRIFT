@@ -367,9 +367,10 @@ class TestInputValidation:
 
     def test_FR15_invalid_driver_scenario_combo_rejected(self):
         """execute_scenario raises ValueError when driver variant is not applicable."""
-        # byte_swap is only applicable for baseline_25c, not baseline_neg1c.
+        # byte_swap is not applicable for fault scenarios; fault_nack_identity
+        # accepts only "baseline".
         with pytest.raises(ValueError, match="not applicable"):
-            execute_scenario("baseline_neg1c", "byte_swap")
+            execute_scenario("fault_nack_identity", "byte_swap")
 
     def test_unknown_driver_variant_rejected(self):
         """execute_scenario raises ValueError for unknown driver variant."""

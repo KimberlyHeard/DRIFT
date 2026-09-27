@@ -41,6 +41,7 @@ from drift.clock import VirtualClock
 from drift.contract import ApprovedContract, ApprovalMissingError, StaleApprovalError
 from drift.devices.tmp117 import TMP117VirtualDevice
 from drift.drivers.tmp117 import TMP117Driver
+from drift.drivers.tmp117_repair_candidate import RepairCandidateDriver
 from drift.drivers.tmp117_variants import ByteSwapDriver
 from drift.fault_bus import FaultBus
 from drift.interfaces import (
@@ -133,6 +134,8 @@ def _build_driver(variant: str, bus, clock):
         return TMP117Driver(bus, clock, address_7bit=0x48)
     if variant == "byte_swap":
         return ByteSwapDriver(bus, clock, address_7bit=0x48)
+    if variant == "repair_candidate":
+        return RepairCandidateDriver(bus, clock, address_7bit=0x48)
     raise ValueError(f"Unknown driver variant {variant!r}")
 
 
@@ -382,6 +385,9 @@ def execute_verify(
         ("fault_wrong_id_bits", "baseline"),
         ("fault_short_temp", "baseline"),
         ("baseline_25c", "byte_swap"),
+        ("baseline_neg1c", "byte_swap"),
+        ("baseline_25c", "repair_candidate"),
+        ("baseline_neg1c", "repair_candidate"),
     ]
     results = []
     for scenario_id, variant in plan:

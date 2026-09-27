@@ -47,7 +47,9 @@ APPROVED_PROFILE_ID: str = "tmp117-oneshot-noavg-0x48"
 CLI_PROFILE_ID: str = "tmp117_one_shot_no_average"
 
 # Set of driver variant names accepted by public execution.
-SUPPORTED_DRIVER_VARIANTS: frozenset[str] = frozenset({"baseline", "byte_swap"})
+SUPPORTED_DRIVER_VARIANTS: frozenset[str] = frozenset(
+    {"baseline", "byte_swap", "repair_candidate"}
+)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -143,7 +145,7 @@ def _make_registry() -> dict[str, ScenarioDef]:
                 "virtual_time_us=16_000)."
             ),
         ),
-        applicable_drivers=frozenset({"baseline", "byte_swap"}),
+        applicable_drivers=frozenset({"baseline", "byte_swap", "repair_candidate"}),
     )
 
     # ------------------------------------------------------------------
@@ -166,7 +168,7 @@ def _make_registry() -> dict[str, ScenarioDef]:
                 "virtual_time_us=16_000)."
             ),
         ),
-        applicable_drivers=frozenset({"baseline"}),
+        applicable_drivers=frozenset({"baseline", "byte_swap", "repair_candidate"}),
     )
 
     # ------------------------------------------------------------------
