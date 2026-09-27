@@ -7,10 +7,15 @@ CLI usage (PowerShell)::
         --candidate contracts/tmp117.candidate.json
         --source   local_sources/tmp117.pdf
 
+    .venv/Scripts/python.exe scripts/approve_contract.py
+        --candidate contracts/bme280.candidate.json
+        --source   local_sources/bme280.pdf
+
 What this script does
 ---------------------
 1. Hash the supplied PDF and compare it to the known value recorded in
-   ``src/drift/contract.py:KNOWN_TMP117_SOURCE_SHA256``.  Refuse on mismatch.
+   ``src/drift/contract.py:PROFILE_SOURCE_SHA256`` for the contract's profile.
+   Refuse on mismatch.
 2. Load and validate the candidate contract via ``drift.contract.load_candidate()``.
    Refuse if any citation is missing, the profile is unsupported, or the JSON
    is structurally invalid.
@@ -20,8 +25,8 @@ What this script does
    change it to ``"reviewed"`` manually before running this script.
 5. Prompt the reviewer to enter their name and an explicit ``YES`` confirmation.
    Any other input aborts without writing any output.
-6. Call ``approve_contract()`` and write ``contracts/tmp117.approved.json``
-   containing source hash, contract hash, reviewer name, and UTC timestamp.
+6. Call ``approve_contract()`` and write the approved JSON file containing
+   source hash, contract hash, reviewer name, and UTC timestamp.
 
 This script MUST NOT be used to approve a contract without human review.
 The script itself NEVER supplies the confirmation or reviewer name.
@@ -42,7 +47,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from pydantic import ValidationError as _PydanticValidationError  # noqa: E402
 
 from drift.contract import (  # noqa: E402
+    KNOWN_BME280_SOURCE_SHA256,
     KNOWN_TMP117_SOURCE_SHA256,
+    PROFILE_SOURCE_SHA256,
     SUPPORTED_PROFILES,
     ContractError,
     MissingCitationError,
@@ -104,18 +111,14 @@ def _display_contract(candidate) -> None:
     print(f"  profile_id            : {candidate.profile_id}")
     print(f"  address7              : 0x{sp.address7:02X}  ({sp.address7})")
     print(f"  mode                  : {sp.mode}")
-    print(f"  averaging             : {sp.averaging}")
     print(f"  initial_fixture_state : {sp.initial_fixture_state}")
+    for key, value in sp.model_dump().items():
+        if key not in {"address7", "mode", "initial_fixture_state"}:
+            print(f"  {key:24}: {value}")
 
-    _section("DERIVED REGISTER CANDIDATES  [derived — NOT vendor facts]")
-    dc = candidate.derived_candidates
-    print(f"  shutdown_config_hex             : {dc.shutdown_config_hex}")
-    print(f"  start_config_hex                : {dc.start_config_hex}")
-    print(f"  completed_config_snapshot_hex   : {dc.completed_config_snapshot_hex}")
-    print(f"  after_ready_consumed_hex        : {dc.after_ready_consumed_hex}")
-    print()
-    for line in textwrap.wrap(dc.derivation, width=68, initial_indent="  Note: ", subsequent_indent="        "):
-        print(line)
+    _section("DERIVED REGISTER CANDIDATES  [derived ? NOT vendor facts]")
+    for key, value in candidate.derived_candidates.model_dump().items():
+        print(f"  {key:32}: {value}")
 
     _section("DRIFT POLICIES  [project decisions — NOT vendor facts]")
     pol = candidate.policies_not_vendor_facts
@@ -170,9 +173,6 @@ def main(argv: list[str] | None = None) -> int:
     # ------------------------------------------------------------------ step 1
     # Verify paths exist.
     # ------------------------------------------------------------------
-    if not candidate_path.exists():
-        print(f"ERROR: candidate file not found: {candidate_path}", file=sys.stderr)
-        return 2
     if not source_path.exists():
         print(f"ERROR: source PDF not found: {source_path}", file=sys.stderr)
         return 2
@@ -186,19 +186,43 @@ def main(argv: list[str] | None = None) -> int:
     # ------------------------------------------------------------------ step 2
     # Hash the PDF and compare to the known value.
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------ step 1b
+    # Load the candidate JSON early enough to know which profile we have,
+    # so we can look up the correct expected hash.  Full validation happens
+    # later; here we just need the profile_id.
+    # ------------------------------------------------------------------
+    if not candidate_path.exists():
+        print(f"ERROR: candidate file not found: {candidate_path}", file=sys.stderr)
+        return 2
+
+    try:
+        import json as _json
+        _raw_peek = _json.loads(candidate_path.read_text(encoding="utf-8"))
+        peek_profile = _raw_peek.get("profile_id", "")
+    except Exception:
+        peek_profile = ""
+
+    expected_hash = {
+        "tmp117-oneshot-noavg-0x48": KNOWN_TMP117_SOURCE_SHA256,
+        "bme280-forced-temp-0x76": KNOWN_BME280_SOURCE_SHA256,
+    }.get(peek_profile)
+    if expected_hash is None:
+        print(f"ERROR: unsupported profile {peek_profile!r}", file=sys.stderr)
+        return 4
+
     print()
     print("Hashing source PDF …", end=" ", flush=True)
     actual_hash = _hash_file(source_path)
     print("done.")
     print(f"  Computed SHA-256 : {actual_hash}")
-    print(f"  Expected SHA-256 : {KNOWN_TMP117_SOURCE_SHA256}")
+    print(f"  Expected SHA-256 : {expected_hash}")
 
-    if actual_hash != KNOWN_TMP117_SOURCE_SHA256:
+    if actual_hash != expected_hash:
         print()
         print("ERROR: PDF hash does not match the expected value.", file=sys.stderr)
         print(
             "  The file may have changed, or this is a different revision.\n"
-            "  Update KNOWN_TMP117_SOURCE_SHA256 in src/drift/contract.py\n"
+            "  Update PROFILE_SOURCE_SHA256 in src/drift/contract.py\n"
             "  only after re-reading the source pages.",
             file=sys.stderr,
         )

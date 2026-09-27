@@ -58,6 +58,7 @@ from pydantic import (
 # ---------------------------------------------------------------------------
 SUPPORTED_PROFILES: frozenset[str] = frozenset({
     "tmp117-oneshot-noavg-0x48",
+    "bme280-forced-temp-0x76",
 })
 
 # SHA-256 of the reviewed TMP117 source PDF, confirmed by the previous Bob
@@ -66,6 +67,19 @@ SUPPORTED_PROFILES: frozenset[str] = frozenset({
 KNOWN_TMP117_SOURCE_SHA256: str = (
     "637a143dda6317d22222e265de47ceac72ba6aed4461ad460efbe84e16b936df"
 )
+
+# SHA-256 of the reviewed BME280 source PDF.
+# Source: Bosch BST-BME280-DS001-24 Rev. 1.24 — local_sources/bme280.pdf
+# Recorded in local_sources/bme280.provenance.json; verified by Task 10.
+KNOWN_BME280_SOURCE_SHA256: str = (
+    "a2ccdb449fec94380742fe8eec851a11d9bd4142252d332b34682b4deecd7d89"
+)
+
+# Maps profile_id → known source SHA-256 for the approve_contract gate.
+PROFILE_SOURCE_SHA256: dict[str, str] = {
+    "tmp117-oneshot-noavg-0x48": KNOWN_TMP117_SOURCE_SHA256,
+    "bme280-forced-temp-0x76": KNOWN_BME280_SOURCE_SHA256,
+}
 
 # ---------------------------------------------------------------------------
 # Errors
@@ -156,20 +170,25 @@ class FactEntry(BaseModel):
 
 
 class SelectedProfile(BaseModel):
-    """The operating profile chosen for this contract instance."""
+    """The operating profile chosen for this contract instance.
 
-    model_config = ConfigDict(frozen=True)
+    Device-agnostic required fields.  Device-specific extra fields (e.g.
+    ``averaging`` for TMP117, ``osrs_t`` / ``osrs_p`` / ``osrs_h`` for
+    BME280) are permitted via ``extra="allow"`` and carry no schema
+    enforcement here — correctness is the human reviewer's responsibility.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="allow")
 
     address7: int = Field(..., ge=1, le=0x77)
-    mode: Literal["one_shot", "shutdown", "continuous"]
-    averaging: Literal["none", "8x", "32x", "64x"]
+    mode: str  # e.g. "one_shot", "forced", "shutdown", "continuous"
     initial_fixture_state: str
 
 
 class PoliciesBlock(BaseModel):
     """DRIFT policy values — not vendor facts; labeled separately per AGENTS.md."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="allow")
 
     timeout_us: int = Field(..., gt=0)
     poll_interval_us: int = Field(..., gt=0)
@@ -179,14 +198,15 @@ class PoliciesBlock(BaseModel):
 
 
 class DerivedCandidates(BaseModel):
-    """Derived register candidates — must be validated against source before approval."""
+    """Derived register candidates — must be validated against source before approval.
 
-    model_config = ConfigDict(frozen=True)
+    Required fields are device-agnostic.  Device-specific fields (e.g.
+    TMP117 start_config_hex or BME280 ctrl_meas_forced_hex) are captured
+    via ``extra="allow"``.
+    """
 
-    shutdown_config_hex: str
-    start_config_hex: str
-    completed_config_snapshot_hex: str
-    after_ready_consumed_hex: str
+    model_config = ConfigDict(frozen=True, extra="allow")
+
     derivation: str
 
 

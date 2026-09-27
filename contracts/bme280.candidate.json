@@ -1,0 +1,151 @@
+{
+  "schema_version": "draft-0",
+  "device": "bme280",
+  "profile_id": "bme280-forced-temp-0x76",
+  "status": "reviewed",
+  "approval": null,
+  "source": {
+    "id": "bme280",
+    "document": "BST-BME280-DS001-24",
+    "revision": "1.24",
+    "sha256": "a2ccdb449fec94380742fe8eec851a11d9bd4142252d332b34682b4deecd7d89"
+  },
+  "facts": [
+    {
+      "id": "F01",
+      "claim": "Chip ID register 0xD0 returns 0x60 for BME280 mass production devices.",
+      "page": 27,
+      "pages": null,
+      "section": "5.4.1"
+    },
+    {
+      "id": "F02",
+      "claim": "SDO tied to GND selects 7-bit I2C address 1110110 (0x76); SDO tied to VDDIO selects 0x77. To select the I2C interface, CSB must be connected to VDDIO; SDO must not float.",
+      "page": 32,
+      "pages": null,
+      "section": "6.2"
+    },
+    {
+      "id": "F03",
+      "claim": "Calibration dig_T1 is unsigned short; dig_T2 and dig_T3 are signed short. All stored as two 8-bit bytes with LSB at lower address (little-endian). Addresses: dig_T1 at 0x88/0x89, dig_T2 at 0x8A/0x8B, dig_T3 at 0x8C/0x8D.",
+      "page": 24,
+      "pages": null,
+      "section": "4.2.2"
+    },
+    {
+      "id": "F04",
+      "claim": "Raw temperature is unsigned 20-bit: ut[19:12] at 0xFA (temp_msb), ut[11:4] at 0xFB (temp_lsb), ut[3:0] at 0xFC bits[7:4] (temp_xlsb). Temperature compensation formula input is the 20-bit unsigned value stored in a signed 32-bit integer.",
+      "page": null,
+      "pages": [
+        25,
+        31
+      ],
+      "section": "5.4.8"
+    },
+    {
+      "id": "F05",
+      "claim": "The 32-bit integer temperature compensation computes var1 from adc_T, dig_T1 and dig_T2; for var2, it squares ((adc_T >> 4) - dig_T1), shifts that product right by 12, multiplies by dig_T3, then shifts right by 14. t_fine = var1 + var2; T = (t_fine * 5 + 128) >> 8, in units of 0.01 degrees Celsius. See the exact source formula.",
+      "page": 25,
+      "pages": null,
+      "section": "4.2.3"
+    },
+    {
+      "id": "F06",
+      "claim": "mode[1:0] in ctrl_meas (0xF4) bits[1:0]: 00=sleep, 01 or 10=forced (one measurement then return to sleep), 11=normal.",
+      "page": 29,
+      "pages": null,
+      "section": "5.4.5"
+    },
+    {
+      "id": "F07",
+      "claim": "status register 0xF3 bit3 = measuring[0]: set to 1 while conversion running, cleared when results transferred to data registers. Bit0 = im_update[0]: set to 1 when NVM data are being copied to image registers (at power-on-reset and before every conversion), cleared when done.",
+      "page": 28,
+      "pages": null,
+      "section": "5.4.4"
+    },
+    {
+      "id": "F08",
+      "claim": "osrs_t[2:0] in ctrl_meas (0xF4) bits[7:5]: 000=skipped (output 0x80000), 001=oversampling x1, 010=x2, 011=x4, 100=x8, 101 and above=x16.",
+      "page": 29,
+      "pages": null,
+      "section": "5.4.5"
+    },
+    {
+      "id": "F09",
+      "claim": "osrs_p[2:0] in ctrl_meas bits[4:2]: 000=skipped (output 0x80000), 001=x1 ... 101 and above=x16. Setting 000 skips pressure measurement.",
+      "page": 29,
+      "pages": null,
+      "section": "5.4.5"
+    },
+    {
+      "id": "F10",
+      "claim": "osrs_h[2:0] in ctrl_hum (0xF2) bits[2:0]: 000=skipped (output 0x8000), 001=x1 ... 101 and above=x16. Changes to ctrl_hum only become effective after a write to ctrl_meas.",
+      "page": null,
+      "pages": [
+        27,
+        28
+      ],
+      "section": "5.4.3"
+    },
+    {
+      "id": "F11",
+      "claim": "filter[2:0] in config register 0xF5 bits[4:2]: 000=filter off, 001=coefficient 2, 010=4, 011=8, 100 and above=16.",
+      "page": 30,
+      "pages": null,
+      "section": "5.4.6"
+    },
+    {
+      "id": "F12",
+      "claim": "Measurement time formulas (ms): t_meas_typ = 1 + [2 * T_oversampling] (if osrs_t != 0) + [2 * P_oversampling + 0.5] (if osrs_p != 0) + [2 * H_oversampling + 0.5] (if osrs_h != 0); t_meas_max = 1.25 + [2.3 * T_oversampling] (if osrs_t != 0) + [2.3 * P_oversampling + 0.575] (if osrs_p != 0) + [2.3 * H_oversampling + 0.575] (if osrs_h != 0). For temperature x1 with pressure and humidity skipped: typical 3.0 ms; maximum 3.55 ms.",
+      "page": 51,
+      "pages": null,
+      "section": "9.1"
+    },
+    {
+      "id": "F13",
+      "claim": "After power-on-reset the sensor is in sleep mode. In forced mode a single measurement is performed then the sensor returns to sleep mode. The forced mode must be selected again for each subsequent measurement.",
+      "page": 15,
+      "pages": null,
+      "section": "3.3.3"
+    }
+  ],
+  "selected_profile": {
+    "address7": 118,
+    "mode": "forced",
+    "initial_fixture_state": "sleep_after_nvm_copy",
+    "osrs_t": "x1",
+    "osrs_p": "skipped",
+    "osrs_h": "skipped",
+    "filter": "off"
+  },
+  "policies_not_vendor_facts": {
+    "timeout_us": 100000,
+    "poll_interval_us": 1000,
+    "virtual_conversion_us": 3600,
+    "clock": "deterministic_integer_microseconds",
+    "physical_hardware_validated": false,
+    "timing_note": "DRIFT policy: virtual_conversion_us=3600 is a deterministic fixture assumption slightly above the 3.55 ms Bosch maximum calculated for this selected profile (F12). Physical hardware has not been tested."
+  },
+  "derived_candidates": {
+    "derivation": "Derived register settings from the cited Bosch bit fields for DRIFT’s selected fixture; these are project calculations, not Bosch-supplied configuration words.",
+    "ctrl_hum_sleep_hex": "00",
+    "ctrl_meas_sleep_hex": "00",
+    "ctrl_meas_forced_hex": "21",
+    "config_filter_off_hex": "00",
+    "ctrl_meas_derivation": "From Table 22 and Tables 24–25, printed p.29: osrs_t=001 in bits 7:5 gives 0x20; osrs_p=000 in bits 4:2 gives 0x00; forced mode=01 in bits 1:0 gives 0x01; combined ctrl_meas=0x21. Human reviewer confirms this calculation before approving.",
+    "status_measuring_bit": "bit3 (mask 0x08) per F07",
+    "status_im_update_bit": "bit0 (mask 0x01) per F07",
+    "calib_t_read_address": "0x88",
+    "calib_t_read_length_bytes": 6
+  },
+  "model_limits": [
+    "Temperature-only forced mode profile; pressure and humidity outputs not implemented",
+    "No IIR filter (filter off)",
+    "No SPI interface support in this profile",
+    "No continuous / normal mode",
+    "No electrical waveform or bus arbitration model",
+    "No accuracy or thermal model",
+    "No EEPROM programming"
+  ],
+  "review_instructions": "Human reviewer: compare F01–F13 and the selected profile against the cited printed pages of the hash-verified Bosch PDF. Check dig_T signedness, byte layout, the compensation shifts on p.25, forced timing (typical 3.0 ms; maximum 3.55 ms), and the derived ctrl_meas=0x21 bit fields on p.29. Only after that review, change status to reviewed and personally execute scripts/approve_contract.py. The 3600 us virtual conversion time is a DRIFT fixture policy, not a Bosch guarantee."
+}
