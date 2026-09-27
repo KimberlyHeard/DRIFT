@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DRIFT · Datasheet-to-Driver Virtual Verification Lab</title>
+<title>DRIFT Verification Lab</title>
 <meta name="description" content="DRIFT is a verification lab for AI-written embedded code. Recorded bus steps can be inspected against page-cited approved facts where applicable.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
 
 <header class="top">
   <span class="wordmark">DRIFT</span>
-  <span class="subtitle">Datasheet-to-Driver Virtual Verification Lab</span>
+  <span class="subtitle">Verification Lab · Datasheet Requirements, Implementation, and Fault Testing</span>
   <nav aria-label="Sheets">
     <a href="#s1"><b>01</b>Thesis</a><a href="#s2"><b>02</b>Why</a><a href="#s3"><b>03</b>Method</a><a href="#s4"><b>04</b>Workbench</a>
     <a href="#s5"><b>05</b>Repair</a><a href="#s6"><b>06</b>Second sensor</a><a href="#s7"><b>07</b>Register</a>
@@ -30,8 +30,8 @@
 <section class="sheet" id="s1" data-n="01" data-t="Thesis"><div class="frame">
   <div class="hero">
     <div class="hero-text">
-      <h1>AI can write the driver. How do you check what it <em>actually does?</em></h1>
-      <p class="lede">DRIFT is a verification lab for AI-written embedded code. A person approves page-cited facts from a real datasheet. IBM Bob builds the driver, a virtual sensor and the checks. Plain Python runs them and records every bus transaction, with source citations on fact-tagged steps, before the hardware is on the bench.</p>
+      <h1>AI can write a sensor driver in minutes. How do we check it against the datasheet?</h1>
+      <p class="lede">An engineer reviews page-cited requirements from the manufacturer's datasheet. IBM Bob builds the driver, a deterministic virtual sensor and the fault tests. Plain Python checks the runs against independent answers and records their bus transactions. Cited steps link back to the approved facts.</p>
       <div class="hero-cta">
         <a class="btn solid" href="#s4">Open the workbench</a>
         <a class="btn" href="https://github.com/KimberlyHeard/DRIFT">Read the code and evidence</a>
@@ -60,7 +60,7 @@
           <rect x="438" y="480" width="182" height="58" fill="#FFD43B"/>
           <rect x="443" y="485" width="172" height="48" fill="none" stroke="#16181D" stroke-width="1.4"/>
           <text x="529" y="505" text-anchor="middle" font-family="IBM Plex Mono" font-size="12.5" font-weight="600" letter-spacing="1.6" fill="#16181D">APPROVED</text>
-          <text x="529" y="523" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="#16181D">K. HEARD · 2026-09-26</text>
+          <text x="529" y="523" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="#16181D">REVIEWED · 2026-09-26</text>
         </g>
         <g class="fade" style="--d:3.4s"><circle cx="424" cy="509" r="12" fill="#FFD43B" stroke="#16181D" stroke-width="1.2"/><text x="424" y="513.5" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="#16181D">2</text></g>
       </svg>
@@ -72,19 +72,19 @@
 
 <figure class="art-bridge" aria-label="Illustrative image of source sheets and signal paths leading to a sensor package">
   <img src="drift-art.png" alt="Illustrative artwork: layered datasheet pages, colored signal paths and a sensor package" loading="lazy">
-  <figcaption>Visual explanation of the workflow. Recorded evidence and measured values appear in the workbench below; this artwork is illustrative.</figcaption>
+  <figcaption>Illustrative artwork. Recorded runs and measurements appear in the workbench.</figcaption>
 </figure>
 
 <!-- ================= 02 WHY ================= -->
 <section class="sheet" id="s2" data-n="02" data-t="Why it matters"><div class="frame">
   <div class="two">
-    <h2>Code is getting cheap. Trust in code that touches hardware is <em>not.</em></h2>
-    <p class="lede" style="margin-top:6px">Every chip ships with a datasheet: hundreds of pages of registers, bit fields, byte order, timing and calibration. Turning it into a driver is careful manual translation, usually done before the board exists. AI assistants can produce that code rapidly; teams still need to verify the behavior against the source.</p>
+    <h2>AI can write a driver in minutes. Checking it against the datasheet is the hard part.</h2>
+    <p class="lede" style="margin-top:6px">Every chip ships with a datasheet: dozens of pages of registers, bit fields, byte order, timing and calibration. Turning it into a driver is careful manual translation, usually done before the board exists. AI assistants can produce that code rapidly; teams still need to verify the behavior against the source.</p>
   </div>
   <div class="shift">
     <div><span class="k">Today</span><h3>Translate by hand, find out on hardware</h3><p>Mistakes in byte order, timing or calibration surface on a physical bench, where they are slow to reproduce and hard to explain.</p></div>
     <div><span class="k">With AI assistants</span><h3>Generated code still needs checking</h3><p>A generated driver can compile and look right while misreading the sensor. Reviewers need more than the code and the model's confidence.</p></div>
-    <div class="hl"><span class="k">With DRIFT</span><h3>Every claim checked against its source</h3><p>Approved facts, independent expectations, a deterministic virtual sensor and a trace whose fact-tagged steps link to cited source pages.</p></div>
+    <div class="hl"><span class="k">With DRIFT</span><h3>Behavior checked against reviewed facts</h3><p>Approved facts, independent expectations, a deterministic virtual sensor and a trace whose fact-tagged steps link to cited source pages.</p></div>
   </div>
   <div class="users">
     <h3 class="sm">Who it is for</h3>
@@ -92,7 +92,7 @@
       <li><b>Firmware engineers</b> bringing up a new sensor before boards arrive.</li>
       <li><b>Hardware startups</b> without a dedicated validation team.</li>
       <li><b>Teams adopting AI assistants</b> who need an audit trail for generated code.</li>
-      <li><b>Reviewers and instructors</b> who must explain why a driver deserves trust.</li>
+      <li><b>Reviewers</b> who need to show why a driver can be trusted.</li>
     </ul>
   </div>
   <div class="roadmap">
@@ -109,17 +109,17 @@
 <!-- ================= 03 METHOD ================= -->
 <section class="sheet" id="s3" data-n="03" data-t="Method"><div class="frame">
   <div class="two">
-    <h2>Bob builds the engineering. Kimberly approves the facts. <em>Python checks the result.</em></h2>
+    <h2>How it works</h2>
     <div>
       <div class="defbox"><span class="tag">DEF</span><b>Driver:</b> the code that lets a processor talk to a chip over a bus.</div>
       <div class="defbox"><span class="tag">DEF</span><b>Virtual sensor:</b> a deterministic Python model of the chip's selected registers and conversion timing, with an integer microsecond clock. Ordinary code, not an AI imitating a sensor.</div>
-      <div class="defbox"><span class="tag">WHY</span><b>Why not just ask for a driver?</b> A prompt returns code and confidence. DRIFT returns code plus reviewed sources, independent expectations and reproducible failing cases that show when the code is wrong.</div>
+      <div class="defbox"><span class="tag">WHY</span><b>Why not just ask for a driver?</b> DRIFT returns code plus reviewed sources, independent expectations and reproducible failing cases that show when the code is wrong.</div>
     </div>
   </div>
   <ol class="flow">
-    <li><div class="node"><i>1</i></div><span class="who">Kimberly</span><b>Choose a narrow profile</b><span class="t">One real sensor, one address, one mode.</span></li>
+    <li><div class="node"><i>1</i></div><span class="who">Engineer</span><b>Choose a narrow profile</b><span class="t">One real sensor, one address, one mode.</span></li>
     <li><div class="node"><i>2</i></div><span class="who">IBM Bob</span><b>Draft cited facts</b><span class="t">Claims from the vendor PDF, each with page and section.</span></li>
-    <li class="gate"><div class="node"><i>3</i></div><span class="who">Kimberly</span><b>Approve by name</b><span class="t">Hashes bind the approved content to the exact PDF revision.</span></li>
+    <li class="gate"><div class="node"><i>3</i></div><span class="who">Engineer</span><b>Approve by name</b><span class="t">Hashes bind the approved content to the exact PDF revision.</span></li>
     <li><div class="node"><i>4</i></div><span class="who">IBM Bob</span><b>Implement and generate</b><span class="t">Driver, virtual sensor, faults, runner, reports, generator.</span></li>
     <li><div class="node"><i>5</i></div><span class="who">Python</span><b>Execute and check</b><span class="t">Independent literal answers decide pass or fail.</span></li>
     <li><div class="node"><i>6</i></div><span class="who">IBM Bob</span><b>Diagnose and repair</b><span class="t">Reports tie each failure to its bytes. Expectations stayed fixed for the recorded repair.</span></li>
@@ -129,8 +129,8 @@
 <!-- ================= 04 WORKBENCH ================= -->
 <section class="sheet" id="s4" data-n="04" data-t="Workbench"><div class="frame">
   <div class="two">
-    <h2>Pick a sensor and a situation. Inspect the bytes, timing and <em>source facts.</em></h2>
-    <p class="lede" style="margin-top:6px">Each entry is one recorded run. Step through the bus transactions; steps tagged with source facts show those citations; other steps say when no fact reference was recorded. Injected faults are clouded in coral where they happened, the way a drawing marks a revision.</p>
+    <h2>Recorded runs</h2>
+    <p class="lede" style="margin-top:6px">Each entry is one recorded run. Step through the bus transactions; steps tagged with source facts show those citations; other steps say when no fact reference was recorded. Injected faults are marked in orange where they occurred.</p>
   </div>
   <div class="devtabs" role="tablist" aria-label="Sensor" id="devTabs"></div>
   <div class="bench">
@@ -142,7 +142,7 @@
 <!-- ================= 05 REPAIR ================= -->
 <section class="sheet" id="s5" data-n="05" data-t="Repair"><div class="frame">
   <div class="two">
-    <h2>Same bytes. Same expectations. One corrected <em>interpretation.</em></h2>
+    <h2>Diagnosis and repair</h2>
     <p class="lede" style="margin-top:6px">A seeded defective driver reads the right bytes in the wrong order. Because the report records the bytes, the cause is visible rather than guessed. Bob patched a separate copy against the same fixed expectations; the original stays broken on purpose as a negative control.</p>
   </div>
   <div class="triad" id="triad"></div>
@@ -154,9 +154,9 @@
     </div>
     <div class="bugnote">
       <span class="tri" aria-hidden="true"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M13 2L24 20H2Z" fill="#fff" stroke="#E4472E" stroke-width="1.5"/><text x="13" y="17" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" font-weight="600" fill="#C9331C">!</text></svg></span>
-      <h3>A real bug, not a staged one</h3>
+      <h3>A defect the checks found on their own</h3>
       <p>Separately from the seeded defect, Bob's first TMP117 virtual device lost the finished temperature when a configuration read cleared the ready flag. Integration tests caught it. Bob corrected the model; the independent temperature expectations did not change.</p>
-      <p class="muted">This is the method working as intended: a mistake by the AI, exposed by checks the AI did not get to rewrite.</p>
+      <p class="muted"></p>
     </div>
   </div>
 </div></section>
@@ -164,7 +164,7 @@
 <!-- ================= 06 BME280 ================= -->
 <section class="sheet" id="s6" data-n="06" data-t="Second sensor"><div class="frame">
   <span class="stamp sun prelim">Approved 2026-09-27 · 3 of 3 recorded cases observed</span>
-  <h2>Bosch BME280: the same method on a harder <em>chip.</em></h2>
+  <h2>Second sensor: Bosch BME280</h2>
   <p class="lede">The TMP117 hands back a finished temperature. The BME280 does not: the driver must read six calibration bytes stored little-endian and signed, assemble a 20-bit raw reading, and run Bosch's integer compensation formula. Different byte order, different conversion semantics, same workflow.</p>
   <div class="reuse">
     <div><h3>Carried over unchanged</h3><ul><li>Register bus and virtual clock interfaces</li><li>Contract format and human approval</li><li>Fault injection and report format</li><li>This workbench</li></ul></div>
@@ -176,7 +176,7 @@
 <!-- ================= 07 REGISTER ================= -->
 <section class="sheet" id="s7" data-n="07" data-t="Register"><div class="frame">
   <div class="two">
-    <h2>What is measured, what is counted, and what is not <em>claimed.</em></h2>
+    <h2>Evidence and limits</h2>
     <p class="lede" style="margin-top:6px">Counts marked "from reports" are computed live from the evidence files on this page. Supplementary checks are software results from an independent review snapshot, kept separate from the test suite.</p>
   </div>
   <table class="reg"><thead><tr><th>FIGURE</th><th>MEANING</th><th>STAMP</th></tr></thead><tbody id="regBody"></tbody></table>
@@ -200,7 +200,7 @@
   </div>
 </div></section>
 
-<footer>DRIFT is a solo proof of concept by Kimberly Heard, Georgia Tech, for the IBM Bob 2.0 hackathon. <a href="https://github.com/KimberlyHeard/DRIFT">github.com/KimberlyHeard/DRIFT</a></footer>
+<footer>DRIFT Verification Lab is a solo proof of concept for the IBM Bob 2.0 hackathon. <a href="https://github.com/KimberlyHeard/DRIFT">github.com/KimberlyHeard/DRIFT</a></footer>
 </div>
 <script src="evidence.js"></script>
 <script src="app.js"></script>

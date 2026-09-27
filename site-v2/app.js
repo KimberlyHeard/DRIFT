@@ -136,7 +136,7 @@ function unitFor(a) { return a && a.assertion_id === 'celsius' ? ' °C' : ''; }
   var cel = run && run.assertions.find(function (a) { return a.assertion_id === 'celsius'; });
   var items = [
     ['', '<b>Datasheet fact F02.</b> ' + esc(tf.F02 && tf.F02.claim), 'TI ' + esc(DEVICES.tmp117.contract.contract.source.document) + ' ' + factRef(tf.F02)],
-    ['sun', '<b>Approved by ' + esc(run.prov.reviewer) + '.</b> Bob drafted the cited facts; the approval binds them to the exact PDF by hash.', esc(String(run.prov.approved_utc).replace('T', ' ').slice(0, 19)) + ' UTC'],
+    ['sun', '<b>Engineer\'s approval.</b> Bob drafted the cited facts; the approval binds them to the exact PDF by hash.', esc(String(run.prov.approved_utc).replace('T', ' ').slice(0, 19)) + ' UTC'],
     ['', '<b>Recorded bus step ' + (step ? step.seq : '?') + ':</b> the driver read register 0x00 and received ' + esc(spaced(step && step.recv)) + '.', 'cites ' + esc(step ? step.facts.join(', ') : '')],
     ['', '<b>Fact F04 and the check.</b> ' + esc(tf.F04 && tf.F04.claim.split(';')[0]) + '. Expected ' + fmtC(cel.expected) + ' °C, observed ' + fmtC(cel.actual) + ' °C.', factRef(tf.F04)]
   ];
@@ -409,7 +409,7 @@ function renderBB(r) {
   var nF = Object.keys(DEVICES.tmp117.facts).length, nB = Object.keys(DEVICES.bme280.facts).length;
   var obs = ALL.filter(function (r) { return r.observed; }).length, ctrl = ALL.filter(function (r) { return r.isControl && !r.observed; }).length;
   var REG = [
-    ['312', 'Automated tests passed, plus 2 subtests, on the final build.', 'Kimberly\'s final Windows pytest run', 'blue', 'Measured'],
+    ['312', 'Automated tests passed, plus 2 subtests, on the final build.', 'Final Windows pytest run', 'blue', 'Measured'],
     [String(ALL.length), 'Recorded verification cases: ' + RUNS.tmp117.length + ' TMP117 and ' + RUNS.bme280.length + ' BME280.', 'from reports on this page', 'ink', 'Counted'],
     [String(obs), 'Cases where the expected behavior was observed, including every injected fault handled correctly.', 'from reports on this page', 'ink', 'Counted'],
     [String(ctrl), 'Intentional byte-swap controls rejected, as designed.', 'from reports on this page', 'ink', 'Counted'],
@@ -426,15 +426,15 @@ function renderBB(r) {
   var t = DEVICES.tmp117.report.provenance, b = DEVICES.bme280.report.provenance;
   function hsh(s) { return esc(s); }
   document.getElementById('titleBlock').innerHTML =
-    '<div class="r2"><span class="k">PROJECT</span><span class="big">DRIFT</span><span class="v" style="display:block;margin-top:6px;font-size:13px;color:var(--ink-2)">Datasheet-to-Driver Virtual Verification Lab</span></div>' +
+    '<div class="r2"><span class="k">PROJECT</span><span class="big">DRIFT</span><span class="v" style="display:block;margin-top:6px;font-size:13px;color:var(--ink-2)">Datasheet Requirements, Implementation, and Fault Testing</span></div>' +
     '<div class="apv"><span class="k">TMP117 PROFILE</span><span class="v m">' + esc(t.approved_profile_id) + '<br>' + esc(t.source_document) + '</span></div>' +
     '<div class="apv s2"><span class="k">TMP117 APPROVAL</span><span class="v">' + esc(t.reviewer) + ' · <span class="m">' + esc(t.approved_utc) + '</span></span><span class="v m" style="display:block">source ' + hsh(t.source_sha256) + '<br>contract ' + hsh(t.contract_sha256) + '</span></div>' +
     '<div class="apv"><span class="k">BME280 PROFILE</span><span class="v m">' + esc(b.approved_profile_id) + '<br>' + esc(b.source_document) + '</span></div>' +
     '<div class="apv s2"><span class="k">BME280 APPROVAL</span><span class="v">' + esc(b.reviewer) + ' · <span class="m">' + esc(b.approved_utc) + '</span></span><span class="v m" style="display:block">source ' + hsh(b.source_sha256) + '<br>contract ' + hsh(b.contract_sha256) + '</span></div>' +
-    '<div><span class="k">SCOPE, SOURCE REVIEW, APPROVAL</span><span class="v">Kimberly Heard</span></div>' +
+    '<div><span class="k">ENGINEER</span><span class="v">Scope, source review and approval</span></div>' +
     '<div class="s2"><span class="k">ENGINEERING · IBM BOB</span><span class="v">Contract validation, interfaces, decoders, drivers, virtual sensors, faults, runners, reports, deterministic generators, integration fix, repair candidate</span></div>' +
     '<div><span class="k">EXECUTION AND VERDICTS</span><span class="v">Plain Python, no model at runtime</span></div>' +
-    '<div class="s2"><span class="k">CHATGPT · CODEX</span><span class="v">Planning, final verification, five final checks, one BME280 short-read trace correction, documentation, presentation</span></div>' +
+    '<div class="s2"><span class="k">CHATGPT · CODEX</span><span class="v">Planning, final verification, five final checks, one BME280 short-read trace correction, BME280 generator completion after Bob\'s task budget cap, documentation, presentation</span></div>' +
     '<div><span class="k">CLAUDE</span><span class="v">Workbench design, copy and review</span></div>' +
     '<div><span class="k">SHEET</span><span class="v m">07 of 07</span></div>';
   var files = [[EV.files.tmp117, 'TMP117 recorded runs'], [EV.files.bme280, 'BME280 recorded runs'], [EV.files.tmp117_contract, 'TMP117 approved contract'], [EV.files.bme280_contract, 'BME280 approved contract'], [EV.files.repair_diff, 'Repair patch']];
